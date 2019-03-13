@@ -18,7 +18,7 @@ const config: webpack.Configuration = {
             {
                 test: /\.ts/,
                 exclude: /node_modules/,
-                use: 'babel-loader',
+                use: 'ts-loader',
             },
         ],
     },
@@ -41,7 +41,7 @@ const config: webpack.Configuration = {
         compress: true,
         port: 9000,
         hot: true,
-        open: true,
+        // open: true,
         historyApiFallback: true,
     },
 };
