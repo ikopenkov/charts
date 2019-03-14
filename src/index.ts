@@ -1,4 +1,8 @@
 import { PointUtils } from 'src/utils/PointUtils/PointUtils';
+import { PolyLine } from './elements/PolyLine/PolyLine';
+// import { ChartData } from '../chartData';
+
+const containerEl = document.getElementsByClassName('svgWrapper')[0];
 
 const xPointsRaw = [
     1542412800000,
@@ -15,43 +19,34 @@ const yPointsRaw = [37, 20, 32, 39, 32, 35, 19, 65, 36];
 
 const xPercents = PointUtils.transformAbsPointsToPercents(xPointsRaw);
 const yPercents = PointUtils.transformAbsPointsToPercents(yPointsRaw);
-console.log({
-    xPercents,
-    yPercents,
-});
 
-const points = xPercents.map((x, index) => {
-    const y = yPercents[index];
+const createSvg = (container: Element) => {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
-    return [x, y] as PointUtils.Point;
-});
-console.log(points);
+    container.appendChild(svg);
 
-const pathDAttr = `M ${points.map(xy => xy.join(' ')).join(' L ')}`;
-console.log(pathDAttr);
+    return svg;
+};
 
-const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-svg.setAttribute('viewBox', '0 0 100 100');
-// svg.setAttribute('width', '500');
-// svg.setAttribute('height', '500');
+const svg = createSvg(containerEl);
 
-// svg.style.width = '100%';
-// svg.style.height = '100%';
-const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-path1.setAttribute('stroke', 'red');
-path1.setAttribute('stroke-width', '0.5');
-path1.setAttribute('fill', 'none');
-path1.setAttribute('d', pathDAttr);
-// <path id="lineAB" d="M 100 350 l 150 -300 l 150 -200" stroke="red" stroke-width="3" fill="none" />
+const polyLine1 = PolyLine.render(xPercents, yPercents, svg);
 
-// const cir1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-// cir1.setAttribute('cx', '80');
-// cir1.setAttribute('cy', '80');
-// cir1.setAttribute('r', '30');
-// cir1.setAttribute('fill', 'red');
+const actualResizeHandler = () => {
+    PolyLine.render(xPercents, yPercents, svg, polyLine1);
+};
 
-svg.appendChild(path1);
+let resizeTimeout;
+const resizeThrottler = () => {
+    // ignore resize events as long as an actualResizeHandler execution is in the queue
+    if (!resizeTimeout) {
+        resizeTimeout = setTimeout(() => {
+            resizeTimeout = null;
+            actualResizeHandler();
 
-const containerEl = document.getElementsByClassName('svgWrapper')[0];
+            // The actualResizeHandler will execute at a rate of 15fps
+        }, 66);
+    }
+};
 
-containerEl.appendChild(svg);
+window.addEventListener('resize', resizeThrottler, false);

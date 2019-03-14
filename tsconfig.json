@@ -4,6 +4,8 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "baseUrl": ".",
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
         "paths": {
             "src/*": ["src/*"]
         }

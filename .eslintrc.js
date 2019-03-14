@@ -24,8 +24,12 @@ module.exports = {
     },
     rules: {
         'prettier/prettier': 'error',
+
+        'func-names': ['error', 'never'],
+
         'import/prefer-default-export': 'off',
         'import/no-default-export': 'error',
+
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/no-namespace': 'off',
         "@typescript-eslint/no-unused-vars": ["error", {
