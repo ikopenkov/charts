@@ -31,12 +31,20 @@ module.exports = {
         'import/no-default-export': 'error',
 
         '@typescript-eslint/explicit-function-return-type': 'off',
+
         '@typescript-eslint/no-namespace': 'off',
-        "@typescript-eslint/no-unused-vars": ["error", {
-          "vars": "all",
-          "args": "none",
-          "ignoreRestSiblings": false
-        }]
+        '@typescript-eslint/no-unused-vars': [
+            'error',
+            {
+                vars: 'all',
+                args: 'none',
+                varsIgnorePattern: '_',
+                ignoreRestSiblings: true,
+            },
+        ],
+        '@typescript-eslint/prefer-interface': 'off',
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-object-literal-type-assertion': 'off',
     },
     settings: {
         'import/resolver': {

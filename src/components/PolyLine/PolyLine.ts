@@ -1,3 +1,6 @@
+import { ObjectUtils } from 'src/utils/ObjectUtils';
+import { Omit } from 'src/utils/Types';
+
 const calcAspectRatio = (containerEl: Element) => {
     const containerWidth = containerEl.clientWidth;
     const containerHeight = containerEl.clientHeight;
@@ -19,12 +22,21 @@ const calcPathData = (
     return `M ${linesCoordinates.join(' L ')}`;
 };
 
-const render = (
-    xPointsInPercents: number[],
-    yPointsInPercents: number[],
-    svg: SVGSVGElement,
-    self?: SVGPathElement,
-) => {
+type RenderParams = {
+    xPointsInPercents: number[];
+    yPointsInPercents: number[];
+    color: string;
+    svg: SVGSVGElement;
+    self?: SVGPathElement;
+};
+
+const render = ({
+    xPointsInPercents,
+    yPointsInPercents,
+    color,
+    svg,
+    self,
+}: RenderParams) => {
     const aspectRatio = calcAspectRatio(svg);
     const pathData = calcPathData(
         xPointsInPercents,
@@ -39,7 +51,7 @@ const render = (
         svg.appendChild(path);
     }
 
-    path.setAttribute('stroke', 'red');
+    path.setAttribute('stroke', color);
     path.setAttribute('stroke-width', '0.5');
     path.setAttribute('fill', 'none');
     path.setAttribute('d', pathData);
@@ -47,12 +59,25 @@ const render = (
     return path;
 };
 
-interface PolyLineRenderParams {
-    xPointsInPercents: number[];
-    yPointsInPercents: number[];
-    svg: SVGSVGElement;
-}
+type PolyLineRenderParams = Omit<RenderParams, 'self'>;
 
 export const PolyLine = {
-    render,
+    render: (renderParams: PolyLineRenderParams) => {
+        const self = render(renderParams);
+
+        const reRender = (partialParams: Partial<RenderParams> = {}) => {
+            const fullParams: RenderParams = ObjectUtils.map((value, key) => {
+                // @ts-ignore
+                return partialParams[key] || value;
+                // TODO: fix ObjectUtils.map to work with non indexed objects
+            }, renderParams) as any;
+            fullParams.self = self;
+
+            render(fullParams);
+        };
+
+        return {
+            reRender,
+        };
+    },
 };

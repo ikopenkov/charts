@@ -1,4 +1,6 @@
-export const ChartData = [
+import { ChartData } from 'src/utils/ChartDataUtils/ChartData.types';
+
+export const ChartDataMock: ChartData[] = [
     {
         columns: [
             [

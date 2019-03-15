@@ -2,10 +2,10 @@
     "compilerOptions": {
         "sourceMap": true,
         "esModuleInterop": true,
+        "noImplicitAny": true,
         "allowSyntheticDefaultImports": true,
         "baseUrl": ".",
         "resolveJsonModule": true,
-        "esModuleInterop": true,
         "paths": {
             "src/*": ["src/*"]
         }
