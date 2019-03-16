@@ -8,7 +8,15 @@ const create = <I, RP extends { self?: I }>(render: (params: RP) => I) => {
             return {
                 reRender: (partialParams: Partial<RenderParams> = {}) => {
                     const fullParams = ObjectUtils.map((value, key) => {
-                        return partialParams[key] || value;
+                        if (
+                            Object.prototype.hasOwnProperty.call(
+                                partialParams,
+                                key,
+                            )
+                        ) {
+                            return partialParams[key];
+                        }
+                        return value;
                     }, renderParams);
                     fullParams.self = self;
 

@@ -3,6 +3,7 @@ import { ChartDataUtils } from 'src/utils/ChartDataUtils/ChartDataUtils';
 import { ChartData } from 'src/utils/ChartDataUtils/ChartData.types';
 import { EventUtils } from 'src/utils/EventUtils';
 import { MousePointer } from 'src/components/MousePointer/MousePointer';
+import { MathUtils } from 'src/utils/MathUtils/MathUtils';
 
 const renderDom = (container: HTMLElement) => {
     const mainContainer = document.createElement('div');
@@ -82,11 +83,11 @@ const render = (container: HTMLElement, data: ChartData) => {
         false,
     );
 
+    let currentX = 0;
     const pointer = MousePointer.render({
         container: svgContainer,
         svg,
-        x: 0,
-        y: 0,
+        x: currentX,
         aspectRatio,
         chartData,
         circleStyle: {
@@ -105,20 +106,32 @@ const render = (container: HTMLElement, data: ChartData) => {
     });
 
     svg.addEventListener('mousemove', event => {
-        const { top, left, width, height } = svg.getBoundingClientRect();
+        const {
+            // top, height,
+            left,
+            width,
+        } = svg.getBoundingClientRect();
         const mouseX = event.clientX;
-        const mouseY = event.clientY;
+        // const mouseY = event.clientY;
 
         const mouseRelX = mouseX - left;
-        const mouseRelY = mouseY - top;
+        // const mouseRelY = mouseY - top;
 
         const mousePercentX = (mouseRelX / width) * 100;
-        const mousePercentY = (mouseRelY / height) * 100;
+        // const mousePercentY = (mouseRelY / height) * 100;
 
-        pointer.reRender({
-            x: mousePercentX,
-            y: mousePercentY,
-        });
+        const x = MathUtils.getNearestPoint(
+            chartData.xColumn.pointsPercentised,
+            mousePercentX,
+        );
+
+        if (x !== currentX) {
+            currentX = x;
+
+            pointer.reRender({
+                x,
+            });
+        }
     });
 };
 

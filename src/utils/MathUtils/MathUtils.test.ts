@@ -88,3 +88,37 @@ describe('getBoundingPoints', () => {
         });
     });
 });
+
+describe('getNearestPoint', () => {
+    it('works', () => {
+        const result = MathUtils.getNearestPoint([1, 3, 4, 7, 9], 5);
+
+        expect(result).toEqual(4);
+    });
+    it('works with negative', () => {
+        const result = MathUtils.getNearestPoint([-4, -1, 3, 4, 7, 9], -2);
+
+        expect(result).toEqual(-1);
+    });
+    it('works with decimal', () => {
+        const result = MathUtils.getNearestPoint(
+            [-4, -1.5, -1, 3, 4, 7, 9],
+            -1.3,
+        );
+
+        expect(result).toEqual(-1.5);
+    });
+    it('works with equal', () => {
+        const result = MathUtils.getNearestPoint(
+            [-4, -1.5, -1, 3, 3, 4, 7, 9],
+            3,
+        );
+
+        expect(result).toEqual(3);
+    });
+    it('works with extremal', () => {
+        const points = [-4, -1.5, -1, 3, 3, 4, 7, 9];
+        expect(MathUtils.getNearestPoint(points, -100)).toEqual(-4);
+        expect(MathUtils.getNearestPoint(points, 100)).toEqual(9);
+    });
+});

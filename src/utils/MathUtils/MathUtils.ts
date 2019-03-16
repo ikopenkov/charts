@@ -58,8 +58,56 @@ const getBoundingPoints = ({
     };
 };
 
+const getTwoBoundingPoints = (points: number[], point: number) => {
+    const { indexOfNext, indexOfPrev } = getBoundingPointsIndexes(
+        points,
+        point,
+    );
+    return { prevPoint: points[indexOfPrev], nextPoint: points[indexOfNext] };
+};
+
+const getNearestPoint = (points: number[], point: number) => {
+    const { nextPoint, prevPoint } = getTwoBoundingPoints(points, point);
+    const prevDif = point - prevPoint;
+    const nextDif = nextPoint - point;
+    if (prevDif < nextDif) {
+        return prevPoint;
+    }
+    return nextPoint;
+};
+
+//
+//
+// Used it to calc point on Y by X, but realised pointers should be rendered
+// only on provided x points, not on values between provided points
+//
+//
+// const calcY = (x: number, xPoints: number[], yPoints: number[]) => {
+//     const boundingPoints = MathUtils.getBoundingPoints({ x, xPoints, yPoints });
+//     const yCalculator = MathUtils.getYOfLineCalculator(boundingPoints);
+//
+//     return yCalculator(x);
+// };
+// const yValuesPercentised = chartData.yColumns.map(yColumn =>
+//     calcY(
+//         x,
+//         chartData.xColumn.pointsPercentised,
+//         yColumn.pointsPercentised,
+//     ),
+// );
+// const yValuesOriginal = chartData.yColumns.map(yColumn =>
+//     Math.round(
+//         calcY(
+//             xOriginal,
+//             chartData.xColumn.pointsOriginal,
+//             yColumn.pointsOriginal,
+//         ),
+//     ),
+// );
+
 export const MathUtils = {
     getYOfLineCalculator,
     getBoundingPointsIndexes,
     getBoundingPoints,
+    getNearestPoint,
 };

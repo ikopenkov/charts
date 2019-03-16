@@ -22,5 +22,5 @@ import { Chart } from 'src/components/Chart/Chart';
 const containerEl = document.getElementsByClassName(
     'svgWrapper',
 )[0] as HTMLDivElement;
-Chart.render(containerEl, ChartDataMock[4]);
+Chart.render(containerEl, ChartDataMock[0]);
 // Chart.render(containerEl, mock);

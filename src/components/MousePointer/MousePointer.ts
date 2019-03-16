@@ -1,7 +1,6 @@
 import { ComponentUtils } from 'src/utils/ComponentUtils';
 import { Circle, CircleInstance } from 'src/components/MousePointer/_Circle';
 import { ChartRenderData } from 'src/utils/ChartDataUtils/ChartData.types';
-import { MathUtils } from 'src/utils/MathUtils/MathUtils';
 import { Ruler, RulerInstance } from 'src/components/MousePointer/_Ruler';
 import {
     Caption,
@@ -10,16 +9,11 @@ import {
 } from 'src/components/MousePointer/_Caption';
 import { ChartDataUtils } from 'src/utils/ChartDataUtils/ChartDataUtils';
 
-const calcY = (x: number, xPoints: number[], yPoints: number[]) => {
-    const boundingPoints = MathUtils.getBoundingPoints({ x, xPoints, yPoints });
-    const yCalculator = MathUtils.getYOfLineCalculator(boundingPoints);
-
-    return yCalculator(x);
-};
-
 const getDateFormatted = (timestamp: number) => {
     const date = new Date(timestamp);
-    return date.toLocaleDateString();
+    const dateStr = date.toString();
+    const [weekDay, mon, day] = dateStr.split(' ');
+    return `${weekDay}, ${mon} ${day}`;
 };
 
 type Instance = {
@@ -30,7 +24,6 @@ type Instance = {
 
 type RenderParams = {
     x: number;
-    y: number;
     chartData: ChartRenderData;
     container: HTMLElement;
     svg: SVGSVGElement;
@@ -58,31 +51,21 @@ const render = ({
     captionStyle,
     self,
 }: RenderParams) => {
-    const yValuesPercentised = chartData.yColumns.map(yColumn =>
-        calcY(
-            x,
-            chartData.xColumn.pointsPercentised,
-            yColumn.pointsPercentised,
-        ),
+    const xOriginal = ChartDataUtils.unpercentise({
+        min: chartData.extremums.xMin,
+        max: chartData.extremums.xMax,
+        percent: x,
+        isY: false,
+    });
+
+    const xIndex = chartData.xColumn.pointsPercentised.indexOf(x);
+
+    const yValuesPercentised = chartData.yColumns.map(
+        col => col.pointsPercentised[xIndex],
     );
-    const xOriginal = Math.round(
-        ChartDataUtils.unpercentise({
-            min: chartData.extremums.xMin,
-            max: chartData.extremums.xMax,
-            percent: x,
-            isY: false,
-        }),
+    const yValuesOriginal = chartData.yColumns.map(
+        col => col.pointsOriginal[xIndex],
     );
-    const yValuesOriginal = chartData.yColumns.map(yColumn =>
-        Math.round(
-            calcY(
-                xOriginal,
-                chartData.xColumn.pointsOriginal,
-                yColumn.pointsOriginal,
-            ),
-        ),
-    );
-    // const dateFormatted =
 
     let instance = self;
     if (!instance) {
