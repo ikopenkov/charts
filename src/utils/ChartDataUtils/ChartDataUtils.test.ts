@@ -119,27 +119,26 @@ describe('ChartDataUtils.transformDataToRender', () => {
                     pointsPercentised: [100, 50, 0],
                 },
             ],
+            extremums: {
+                xMax: 3,
+                xMin: 1,
+                yMax: 5,
+                yMin: 3,
+            },
         });
     });
 
     it('works more', () => {
         const mock: ChartDataTypes.ChartData = {
-            columns: [
-                ['x', 1, 2, 3, 4],
-                // ['y0', 37, 20],
-                ['y1', 5, 10, 1, 15],
-            ],
+            columns: [['x', 1, 2, 3, 4], ['y1', 5, 10, 1, 15]],
             types: {
-                // y0: 'line',
                 y1: 'line',
                 x: 'x',
             },
             names: {
-                // y0: '#0',
                 y1: '#1',
             },
             colors: {
-                // y0: '#3DC23F',
                 y1: '#F34C44',
             },
         };
@@ -169,6 +168,54 @@ describe('ChartDataUtils.transformDataToRender', () => {
                     ],
                 },
             ],
+            extremums: {
+                xMax: 4,
+                xMin: 1,
+                yMax: 15,
+                yMin: 1,
+            },
         });
+    });
+});
+
+describe('ChartDataUtils.unpercentise', () => {
+    it('works', () => {
+        const result = ChartDataUtils.unpercentise({
+            percent: 50,
+            min: 0,
+            max: 10,
+            isY: false,
+        });
+        expect(result).toEqual(5);
+    });
+
+    it('works with negative', () => {
+        const result = ChartDataUtils.unpercentise({
+            percent: 10,
+            min: -10,
+            max: 10,
+            isY: false,
+        });
+        expect(result).toEqual(-8);
+    });
+
+    it('works with decimal', () => {
+        const result = ChartDataUtils.unpercentise({
+            percent: 50,
+            min: -0.5,
+            max: 0.5,
+            isY: false,
+        });
+        expect(result).toEqual(0);
+    });
+
+    it('works with y values', () => {
+        const result = ChartDataUtils.unpercentise({
+            percent: 30,
+            min: -50,
+            max: 50,
+            isY: true,
+        });
+        expect(result).toEqual(20);
     });
 });

@@ -3,14 +3,23 @@ import { Circle, CircleInstance } from 'src/components/MousePointer/_Circle';
 import { ChartRenderData } from 'src/utils/ChartDataUtils/ChartData.types';
 import { MathUtils } from 'src/utils/MathUtils/MathUtils';
 import { Ruler, RulerInstance } from 'src/components/MousePointer/_Ruler';
-import { Caption, CaptionInstance } from 'src/components/MousePointer/_Caption';
+import {
+    Caption,
+    CaptionInstance,
+    CaptionStyle,
+} from 'src/components/MousePointer/_Caption';
+import { ChartDataUtils } from 'src/utils/ChartDataUtils/ChartDataUtils';
 
 const calcY = (x: number, xPoints: number[], yPoints: number[]) => {
     const boundingPoints = MathUtils.getBoundingPoints({ x, xPoints, yPoints });
-
     const yCalculator = MathUtils.getYOfLineCalculator(boundingPoints);
 
     return yCalculator(x);
+};
+
+const getDateFormatted = (timestamp: number) => {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString();
 };
 
 type Instance = {
@@ -35,18 +44,46 @@ type RenderParams = {
         strokeWidthInPercent: number;
         radiusInPercent: number;
     };
+    captionStyle: CaptionStyle;
     self?: Instance;
 };
 const render = ({
     svg,
     container,
-    chartData: { xColumn, yColumns },
+    chartData,
     x,
     aspectRatio,
     circleStyle,
     rulerStyle,
+    captionStyle,
     self,
 }: RenderParams) => {
+    const yValuesPercentised = chartData.yColumns.map(yColumn =>
+        calcY(
+            x,
+            chartData.xColumn.pointsPercentised,
+            yColumn.pointsPercentised,
+        ),
+    );
+    const xOriginal = Math.round(
+        ChartDataUtils.unpercentise({
+            min: chartData.extremums.xMin,
+            max: chartData.extremums.xMax,
+            percent: x,
+            isY: false,
+        }),
+    );
+    const yValuesOriginal = chartData.yColumns.map(yColumn =>
+        Math.round(
+            calcY(
+                xOriginal,
+                chartData.xColumn.pointsOriginal,
+                yColumn.pointsOriginal,
+            ),
+        ),
+    );
+    // const dateFormatted =
+
     let instance = self;
     if (!instance) {
         const ruler = Ruler.render({
@@ -57,15 +94,12 @@ const render = ({
             ...rulerStyle,
         });
 
-        const circles = yColumns.map(yColumn => {
+        const circles = chartData.yColumns.map((yColumn, index) => {
+            yValuesPercentised.push();
             return Circle.render({
                 aspectRatio,
                 x,
-                y: calcY(
-                    x,
-                    xColumn.pointsPercentised,
-                    yColumn.pointsPercentised,
-                ),
+                y: yValuesPercentised[index],
                 color: yColumn.color,
                 svg,
                 ...circleStyle,
@@ -76,6 +110,10 @@ const render = ({
             x,
             aspectRatio,
             container,
+            style: captionStyle,
+            chartData,
+            header: getDateFormatted(xOriginal),
+            yValuesOriginal,
         });
         instance = {
             circles,
@@ -83,16 +121,12 @@ const render = ({
             caption,
         };
     } else {
-        yColumns.forEach((yColumn, index) => {
+        chartData.yColumns.forEach((yColumn, index) => {
             const circle = instance.circles[index];
             circle.reRender({
                 x,
                 aspectRatio,
-                y: calcY(
-                    x,
-                    xColumn.pointsPercentised,
-                    yColumn.pointsPercentised,
-                ),
+                y: yValuesPercentised[index],
                 ...circleStyle,
             });
         });
@@ -104,6 +138,11 @@ const render = ({
         instance.caption.reRender({
             aspectRatio,
             x,
+            header: getDateFormatted(xOriginal),
+            yValuesOriginal,
+            chartData,
+            style: captionStyle,
+            container,
         });
     }
 

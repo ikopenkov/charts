@@ -1,24 +1,25 @@
-import { StringKeyMap } from 'src/utils/Types';
-
-const map = <T, R>(
-    func: (value: T, key: string, obj: StringKeyMap<T>) => R,
-    obj: StringKeyMap<T>,
+const map = <O extends {}, R>(
+    func: (value: O[keyof O], key: keyof O, obj: O) => R,
+    obj: O,
 ) => {
     const objs = Object.keys(obj).map(key => {
-        const value = obj[key];
-        return { [key]: func(value, key, obj) };
+        const keyOfO: keyof O = key as keyof O;
+        const value = obj[keyOfO];
+        return { [key]: func(value, keyOfO, obj) };
     });
 
-    return Object.assign({}, ...objs) as StringKeyMap<R>;
+    // TODO: think, how to return right type if func returns not type of obj[key]
+    return Object.assign({}, ...objs) as O;
 };
 
-const forEach = <T, R>(
-    func: (value: T, key: string, obj: StringKeyMap<T>) => R,
-    obj: StringKeyMap<T>,
+const forEach = <O extends {}>(
+    func: (value: O[keyof O], key: keyof O, obj: O) => void,
+    obj: O,
 ) => {
     Object.keys(obj).forEach(key => {
-        const value = obj[key];
-        func(value, key, obj);
+        const keyOfO: keyof O = key as keyof O;
+        const value = obj[keyOfO];
+        func(value, keyOfO, obj);
     });
 };
 

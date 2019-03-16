@@ -30,4 +30,5 @@ export type ChartRenderColumnData = {
 export type ChartRenderData = {
     xColumn: ChartRenderColumnData & { name: undefined; color: undefined };
     yColumns: ChartRenderColumnData[];
+    extremums: Extremums;
 };

@@ -29,7 +29,7 @@ const calcAspectRatio = (containerEl: Element) => {
     return containerWidth / containerHeight;
 };
 
-const render = (container: HTMLElement, chartData: ChartData) => {
+const render = (container: HTMLElement, data: ChartData) => {
     const sizesInPercent = {
         lineThin: 0.3,
         lineBold: 0.7,
@@ -53,9 +53,9 @@ const render = (container: HTMLElement, chartData: ChartData) => {
     const aspectRatio = calcAspectRatio(svg);
     svg.setAttribute('viewBox', `0 0 ${100 * aspectRatio} 100`);
 
-    const { xColumn, yColumns } = ChartDataUtils.transformDataToRender(
-        chartData,
-    );
+    const chartData = ChartDataUtils.transformDataToRender(data);
+
+    const { xColumn, yColumns } = chartData;
 
     const xPointsPercentised = xColumn.pointsPercentised;
 
@@ -88,7 +88,7 @@ const render = (container: HTMLElement, chartData: ChartData) => {
         x: 0,
         y: 0,
         aspectRatio,
-        chartData: { xColumn, yColumns },
+        chartData,
         circleStyle: {
             radiusInPercent: sizesInPercent.pointerCircleRadius,
             strokeWidthInPercent: sizesInPercent.lineBold,
@@ -97,6 +97,10 @@ const render = (container: HTMLElement, chartData: ChartData) => {
         rulerStyle: {
             widthInPercent: sizesInPercent.lineThin,
             color: colors.ruler,
+        },
+        captionStyle: {
+            backgroundColor: colors.background,
+            headerColor: colors.text,
         },
     });
 

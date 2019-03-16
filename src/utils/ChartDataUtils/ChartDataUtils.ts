@@ -103,7 +103,20 @@ const transformDataToRender = (chartData: ChartData) => {
     return {
         xColumn: getFinalDataByKey(xKey),
         yColumns: yKeys.map(getFinalDataByKey),
+        extremums,
     } as ChartRenderData;
+};
+
+const unpercentise = (params: {
+    percent: number;
+    min: number;
+    max: number;
+    isY: boolean;
+}) => {
+    const percent = params.isY ? 100 - params.percent : params.percent;
+    const range = params.max - params.min;
+    const valueInRange = (percent / 100) * range;
+    return valueInRange + params.min;
 };
 
 export const ChartDataUtils = {
@@ -113,4 +126,5 @@ export const ChartDataUtils = {
     percentisePointsByKey,
     calcExtremums,
     transformDataToRender,
+    unpercentise,
 };
