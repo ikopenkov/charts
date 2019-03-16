@@ -10,17 +10,13 @@ const setElementStyle = (
     options: StyleSetterOptions = {},
 ) => {
     if (options.replaceWholeStyleObject) {
-        const stylesAttrStrings: string[] = [];
-        ObjectUtils.forEach((value, key) => {
-            stylesAttrStrings.push(`${key}: ${value};`);
-        }, style);
-        element.setAttribute('style', stylesAttrStrings.join(' '));
-    } else {
-        ObjectUtils.forEach((value, key) => {
-            // eslint-disable-next-line no-param-reassign
-            element.style[key] = value;
-        }, style);
+        element.setAttribute('style', '');
     }
+
+    ObjectUtils.forEach((value, key) => {
+        // eslint-disable-next-line no-param-reassign
+        element.style[key] = value;
+    }, style);
 };
 
 export const DomUtils = {

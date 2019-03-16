@@ -65,9 +65,6 @@ const render = ({
 
         const descriptionEls = chartData.yColumns.map(col => {
             const el = document.createElement('div');
-            DomUtils.setElementStyle(el, {
-                color: col.color,
-            });
             descriptionsWrapper.appendChild(el);
 
             return el;
@@ -113,6 +110,14 @@ const render = ({
 
     instance.descriptionEls.forEach((el, index) => {
         const yCol = chartData.yColumns[index];
+        DomUtils.setElementStyle(
+            el,
+            {
+                color: yCol.color,
+                paddingLeft: index === 0 ? '0' : '5px',
+            },
+            { replaceWholeStyleObject: true },
+        );
         // eslint-disable-next-line no-param-reassign
         el.innerHTML = renderDescriptionHtml(yValuesOriginal[index], yCol.name);
     });
