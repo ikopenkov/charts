@@ -19,3 +19,15 @@ export type Extremums = {
     yMin: number;
     yMax: number;
 };
+
+export type ChartRenderColumnData = {
+    pointsPercentised: number[];
+    pointsOriginal: number[];
+    name: string;
+    color: string;
+};
+
+export type ChartRenderData = {
+    xColumn: ChartRenderColumnData & { name: undefined; color: undefined };
+    yColumns: ChartRenderColumnData[];
+};

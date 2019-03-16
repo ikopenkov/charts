@@ -1,12 +1,4 @@
-import { ObjectUtils } from 'src/utils/ObjectUtils';
-import { Omit } from 'src/utils/Types';
-
-const calcAspectRatio = (containerEl: Element) => {
-    const containerWidth = containerEl.clientWidth;
-    const containerHeight = containerEl.clientHeight;
-
-    return containerWidth / containerHeight;
-};
+import { ComponentUtils } from 'src/utils/ComponentUtils';
 
 const calcPathData = (
     xPointsInPercents: number[],
@@ -27,6 +19,7 @@ type RenderParams = {
     yPointsInPercents: number[];
     color: string;
     svg: SVGSVGElement;
+    aspectRatio: number;
     self?: SVGPathElement;
 };
 
@@ -36,15 +29,14 @@ const render = ({
     color,
     svg,
     self,
+    aspectRatio,
 }: RenderParams) => {
-    const aspectRatio = calcAspectRatio(svg);
     const pathData = calcPathData(
         xPointsInPercents,
         yPointsInPercents,
         aspectRatio,
     );
 
-    svg.setAttribute('viewBox', `0 0 ${100 * aspectRatio} 100`);
     let path = self;
     if (!path) {
         path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -59,25 +51,4 @@ const render = ({
     return path;
 };
 
-type PolyLineRenderParams = Omit<RenderParams, 'self'>;
-
-export const PolyLine = {
-    render: (renderParams: PolyLineRenderParams) => {
-        const self = render(renderParams);
-
-        const reRender = (partialParams: Partial<RenderParams> = {}) => {
-            const fullParams: RenderParams = ObjectUtils.map((value, key) => {
-                // @ts-ignore
-                return partialParams[key] || value;
-                // TODO: fix ObjectUtils.map to work with non indexed objects
-            }, renderParams) as any;
-            fullParams.self = self;
-
-            render(fullParams);
-        };
-
-        return {
-            reRender,
-        };
-    },
-};
+export const PolyLine = ComponentUtils.create(render);

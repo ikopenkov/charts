@@ -2,6 +2,7 @@ import { StringKeyMap } from 'src/utils/Types';
 import { ObjectUtils } from 'src/utils/ObjectUtils';
 import {
     ChartData,
+    ChartRenderData,
     ColumnData,
     ColumnTypes,
     Extremums,
@@ -26,6 +27,7 @@ const mapPointsByType = (columns: ColumnData[], types: ColumnTypes) => {
 
 const percentisePoints = (
     points: number[],
+    isY: boolean,
     min: number = Math.min(...points),
     max: number = Math.max(...points),
 ) => {
@@ -34,7 +36,11 @@ const percentisePoints = (
 
     const pointsShifted = points.map(point => point - min);
 
-    return pointsShifted.map(point => point * step);
+    const percentized = pointsShifted.map(point => point * step);
+    if (isY) {
+        return percentized.map(p => 100 - p);
+    }
+    return percentized;
 };
 
 const percentisePointsByKey = (
@@ -46,7 +52,7 @@ const percentisePointsByKey = (
         const isX = types[key] === 'x';
         const min = isX ? xMin : yMin;
         const max = isX ? xMax : yMax;
-        return percentisePoints(pointsByKey[key], min, max);
+        return percentisePoints(pointsByKey[key], !isX, min, max);
     }, pointsByKey);
 };
 
@@ -97,7 +103,7 @@ const transformDataToRender = (chartData: ChartData) => {
     return {
         xColumn: getFinalDataByKey(xKey),
         yColumns: yKeys.map(getFinalDataByKey),
-    };
+    } as ChartRenderData;
 };
 
 export const ChartDataUtils = {

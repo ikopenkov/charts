@@ -8,15 +8,25 @@
     <title>Charts</title>
     <style>
         body, html {
-            margin:0; padding: 0;
+            margin: 0;
+            padding: 0;
             height: 100%;
         }
-        body {
+
+        .justBlockForScroll {
+            height: 300px;
+        }
+
+        .chartWrapper {
+            width: 100%;
+            height: 600px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
+
         .svgWrapper {
+            border: 1px solid black;
             width: 50%;
             height: 50%;
             margin: auto;
@@ -26,12 +36,15 @@
             flex-direction: column;
         }
 
-        .svgWrapper>svg {
+        .svgWrapper > svg {
             flex: 1 1 auto;
         }
     </style>
 </head>
 <body>
-<div class="svgWrapper"></div>
+<div class="justBlockForScroll"></div>
+<div class="chartWrapper">
+    <div class="svgWrapper"></div>
+</div>
 </body>
 </html>
