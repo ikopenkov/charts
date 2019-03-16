@@ -4,11 +4,24 @@ type RenderParams = {
     x: number;
     y: number;
     color: string;
+    strokeWidthInPercent: number;
+    radiusInPercent: number;
+    fillColor: string;
     svg: SVGSVGElement;
     aspectRatio: number;
     self?: SVGCircleElement;
 };
-const render = ({ svg, color, x, y, aspectRatio, self }: RenderParams) => {
+const render = ({
+    svg,
+    color,
+    fillColor,
+    radiusInPercent,
+    strokeWidthInPercent,
+    x,
+    y,
+    aspectRatio,
+    self,
+}: RenderParams) => {
     let circle = self;
     if (!circle) {
         circle = document.createElementNS(
@@ -22,10 +35,10 @@ const render = ({ svg, color, x, y, aspectRatio, self }: RenderParams) => {
 
     circle.setAttribute('cx', String(xProportionated));
     circle.setAttribute('cy', String(y));
-    circle.setAttribute('r', '1.5');
+    circle.setAttribute('r', String(radiusInPercent));
     circle.setAttribute('stroke', color);
-    circle.setAttribute('stroke-width', '0.5');
-    circle.setAttribute('fill', '#fff');
+    circle.setAttribute('stroke-width', String(strokeWidthInPercent));
+    circle.setAttribute('fill', fillColor);
 
     return circle;
 };

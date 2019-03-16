@@ -4,12 +4,22 @@ import { ChartData } from 'src/utils/ChartDataUtils/ChartData.types';
 import { EventUtils } from 'src/utils/EventUtils';
 import { MousePointer } from 'src/components/MousePointer/MousePointer';
 
-const createSvg = (container: Element) => {
+const renderDom = (container: HTMLElement) => {
+    const mainContainer = document.createElement('div');
+    const svgContainer = document.createElement('div');
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
-    container.appendChild(svg);
+    svgContainer.style.position = 'relative';
 
-    return svg;
+    container.appendChild(mainContainer);
+    mainContainer.appendChild(svgContainer);
+    svgContainer.appendChild(svg);
+
+    return {
+        svg,
+        mainContainer,
+        svgContainer,
+    };
 };
 
 const calcAspectRatio = (containerEl: Element) => {
@@ -19,8 +29,26 @@ const calcAspectRatio = (containerEl: Element) => {
     return containerWidth / containerHeight;
 };
 
-const render = (container: Element, chartData: ChartData) => {
-    const svg = createSvg(container);
+const render = (container: HTMLElement, chartData: ChartData) => {
+    const sizesInPercent = {
+        lineThin: 0.3,
+        lineBold: 0.7,
+        pointerCircleRadius: 1.5,
+    };
+
+    const colors = {
+        ruler: '#DFE6EB',
+        veticalScale: '#F2F4F5',
+        scaleText: '#96A2AA',
+        text: '#222222',
+        background: '#fff',
+    };
+
+    const {
+        svgContainer,
+        // mainContainer,
+        svg,
+    } = renderDom(container);
 
     const aspectRatio = calcAspectRatio(svg);
     svg.setAttribute('viewBox', `0 0 ${100 * aspectRatio} 100`);
@@ -34,6 +62,7 @@ const render = (container: Element, chartData: ChartData) => {
     const polyLines = yColumns.map(column => {
         return PolyLine.render({
             svg,
+            widthInPercent: sizesInPercent.lineBold,
             color: column.color,
             xPointsInPercents: xPointsPercentised,
             yPointsInPercents: column.pointsPercentised,
@@ -54,11 +83,21 @@ const render = (container: Element, chartData: ChartData) => {
     );
 
     const pointer = MousePointer.render({
+        container: svgContainer,
         svg,
         x: 0,
         y: 0,
         aspectRatio,
         chartData: { xColumn, yColumns },
+        circleStyle: {
+            radiusInPercent: sizesInPercent.pointerCircleRadius,
+            strokeWidthInPercent: sizesInPercent.lineBold,
+            fillColor: colors.background,
+        },
+        rulerStyle: {
+            widthInPercent: sizesInPercent.lineThin,
+            color: colors.ruler,
+        },
     });
 
     svg.addEventListener('mousemove', event => {

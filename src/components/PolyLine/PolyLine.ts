@@ -20,12 +20,14 @@ type RenderParams = {
     color: string;
     svg: SVGSVGElement;
     aspectRatio: number;
+    widthInPercent: number;
     self?: SVGPathElement;
 };
 
 const render = ({
     xPointsInPercents,
     yPointsInPercents,
+    widthInPercent,
     color,
     svg,
     self,
@@ -44,7 +46,7 @@ const render = ({
     }
 
     path.setAttribute('stroke', color);
-    path.setAttribute('stroke-width', '0.5');
+    path.setAttribute('stroke-width', String(widthInPercent));
     path.setAttribute('fill', 'none');
     path.setAttribute('d', pathData);
 
