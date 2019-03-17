@@ -4,6 +4,7 @@ import { ChartData } from 'src/utils/ChartDataUtils/ChartData.types';
 import { EventUtils } from 'src/utils/EventUtils';
 import { MousePointer } from 'src/components/MousePointer/MousePointer';
 import { MathUtils } from 'src/utils/MathUtils/MathUtils';
+import { Grid } from 'src/components/Grid/Grid';
 
 const renderDom = (container: HTMLElement) => {
     const mainContainer = document.createElement('div');
@@ -35,13 +36,15 @@ const render = (container: HTMLElement, data: ChartData) => {
         lineThin: 0.3,
         lineBold: 0.7,
         pointerCircleRadius: 1.5,
+        text: 4,
     };
 
     const colors = {
         ruler: '#DFE6EB',
-        veticalScale: '#F2F4F5',
+        horizontalScale: '#F2F4F5',
         scaleText: '#96A2AA',
         text: '#222222',
+        gridText: '#96A2AA',
         background: '#fff',
     };
 
@@ -55,6 +58,18 @@ const render = (container: HTMLElement, data: ChartData) => {
     svg.setAttribute('viewBox', `0 0 ${100 * aspectRatio} 100`);
 
     const chartData = ChartDataUtils.transformDataToRender(data);
+
+    const grid = Grid.render({
+        svg,
+        aspectRatio,
+        style: {
+            textSizeInPercent: sizesInPercent.text,
+            lineColor: colors.horizontalScale,
+            lineWidthInPercent: sizesInPercent.lineThin,
+            textColor: colors.gridText,
+        },
+        chartData,
+    });
 
     const { xColumn, yColumns } = chartData;
 
@@ -75,6 +90,7 @@ const render = (container: HTMLElement, data: ChartData) => {
         polyLines.forEach(polyLine => {
             polyLine.reRender();
         });
+        grid.reRender();
     };
 
     window.addEventListener(

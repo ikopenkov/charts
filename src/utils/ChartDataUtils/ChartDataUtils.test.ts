@@ -32,28 +32,33 @@ describe('ChartDataUtils.mapPointsByType', () => {
 describe('ChartDataUtils.percentisePoints', () => {
     it('works', () => {
         const [_, ...points] = ChartDataMock.columns[0];
-        const result = ChartDataUtils.percentisePoints(points, false, 0, 10);
+        const result = ChartDataUtils.percentisePoints({
+            points,
+            isY: false,
+            min: 0,
+            max: 10,
+        });
         expect(result).toEqual([10, 20, 30]);
     });
 
     it('transform absolute points to percents values - easy', () => {
         const points = [0, 3, 5, 10];
         const percents = [0, 30, 50, 100];
-        const result = ChartDataUtils.percentisePoints(points, false);
+        const result = ChartDataUtils.percentisePoints({ points });
         expect(result).toEqual(percents);
     });
 
     it('transform absolute points to percents values - negative', () => {
         const points = [-10, 0, 5, 10];
         const percents = [0, 50, 75, 100];
-        const result = ChartDataUtils.percentisePoints(points, false);
+        const result = ChartDataUtils.percentisePoints({ points });
         expect(result).toEqual(percents);
     });
 
     it('transform absolute points to percents values - negative and float', () => {
         const points = [-0.5, 0, 0.25, 0.5];
         const percents = [0, 50, 75, 100];
-        const result = ChartDataUtils.percentisePoints(points, false);
+        const result = ChartDataUtils.percentisePoints({ points });
         expect(result).toEqual(percents);
     });
 });

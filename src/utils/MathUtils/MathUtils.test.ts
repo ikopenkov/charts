@@ -122,3 +122,39 @@ describe('getNearestPoint', () => {
         expect(MathUtils.getNearestPoint(points, 100)).toEqual(9);
     });
 });
+
+describe('divideToRoundParts', () => {
+    it('works', () => {
+        const result = MathUtils.divideToRoundParts({
+            max: 260,
+            parts: 6,
+        });
+
+        expect(result).toEqual([0, 50, 100, 150, 200, 250, 260]);
+    });
+
+    it('works with large numbers', () => {
+        const result = MathUtils.divideToRoundParts({
+            max: 432893,
+            parts: 5,
+        });
+
+        expect(result).toEqual([0, 90000, 180000, 270000, 360000, 432893]);
+    });
+
+    // it('works with small numbers', () => {
+    //     expect(
+    //         MathUtils.divideToRoundParts({
+    //             max: 1,
+    //             parts: 4,
+    //         }),
+    //     ).toEqual([0, 0.25, 0.5, 0.75, 1]);
+    //
+    //     expect(
+    //         MathUtils.divideToRoundParts({
+    //             max: 1.1,
+    //             parts: 4,
+    //         }),
+    //     ).toEqual([0, 0.25, 0.5, 0.75, 1, 1.1]);
+    // });
+});

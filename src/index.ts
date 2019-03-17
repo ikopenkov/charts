@@ -19,6 +19,17 @@ import { Chart } from 'src/components/Chart/Chart';
 //     },
 // };
 
+const switcherEl = document.getElementById('chartSwitcher');
+ChartDataMock.forEach((mock, index) => {
+    const link = document.createElement('a');
+    link.innerText = String(index);
+    link.setAttribute('href', `#${index}`);
+    link.addEventListener('click', () => {
+        console.log('click');
+    });
+    switcherEl.appendChild(link);
+});
+
 const containerEl = document.getElementsByClassName(
     'svgWrapper',
 )[0] as HTMLDivElement;

@@ -25,12 +25,17 @@ const mapPointsByType = (columns: ColumnData[], types: ColumnTypes) => {
     return result;
 };
 
-const percentisePoints = (
-    points: number[],
-    isY: boolean,
-    min: number = Math.min(...points),
-    max: number = Math.max(...points),
-) => {
+const percentisePoints = ({
+    points,
+    isY,
+    min = Math.min(...points),
+    max = Math.max(...points),
+}: {
+    points: number[];
+    isY?: boolean;
+    min?: number;
+    max?: number;
+}) => {
     const percents = 100;
     const step = percents / (max - min);
 
@@ -52,7 +57,12 @@ const percentisePointsByKey = (
         const isX = types[key] === 'x';
         const min = isX ? xMin : yMin;
         const max = isX ? xMax : yMax;
-        return percentisePoints(pointsByKey[key], !isX, min, max);
+        return percentisePoints({
+            points: pointsByKey[key],
+            isY: !isX,
+            min,
+            max,
+        });
     }, pointsByKey);
 };
 

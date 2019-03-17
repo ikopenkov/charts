@@ -42,8 +42,8 @@ const render = ({
     if (!instance) {
         const rootEl = document.createElement('div');
         DomUtils.setElementStyle(rootEl, {
-            minWidth: '100px',
-            fontSize: '14px',
+            minWidth: '80px',
+            fontSize: '13px',
             boxSizing: 'border-box',
         });
         container.appendChild(rootEl);

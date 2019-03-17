@@ -76,6 +76,53 @@ const getNearestPoint = (points: number[], point: number) => {
     return nextPoint;
 };
 
+type DividerParams = {
+    min?: number;
+    max: number;
+    parts: number;
+};
+
+// now it works somehow
+// TODO: fix to work with large numbers, decimal & negative
+const divideToRoundParts = ({ max, min = 0, parts }: DividerParams) => {
+    const range = max - min;
+
+    const rawDivider = Math.round(range / parts) || 1;
+
+    const rawPartStr = String(rawDivider);
+
+    const zeroesStr = String(10 ** (rawPartStr.length - 1)).slice(1);
+
+    let divider = Number(rawPartStr.slice(0, 1) + zeroesStr);
+
+    let resultDivisions = range / divider;
+
+    while (resultDivisions > parts) {
+        divider = Number(divider) + Number(1 + zeroesStr);
+        resultDivisions = range / divider;
+    }
+
+    // while (resultDivisions < parts) {
+    //     divider /= 2;
+    //     resultDivisions = range / divider;
+    // }
+
+    // divider = Number(divider) + Number(1 + zeroesStr);
+    // resultDivisions = range / divider;
+    // }
+
+    const result: number[] = [min];
+    while (result[result.length - 1] !== max) {
+        let nextStep = result[result.length - 1] + divider;
+        if (nextStep > max) {
+            nextStep = max;
+        }
+        result.push(nextStep);
+    }
+
+    return result;
+};
+
 //
 //
 // Used it to calc point on Y by X, but realised pointers should be rendered
@@ -110,4 +157,5 @@ export const MathUtils = {
     getBoundingPointsIndexes,
     getBoundingPoints,
     getNearestPoint,
+    divideToRoundParts,
 };
