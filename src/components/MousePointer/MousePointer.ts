@@ -133,3 +133,4 @@ const render = ({
 };
 
 export const MousePointer = ComponentUtils.create(render);
+export type MousePointerInstance = ReturnType<typeof MousePointer.render>;

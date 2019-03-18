@@ -14,43 +14,46 @@
             font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
         }
 
-        #chartSwitcher {
+        .main {
+            width: 100%;
+            height: 100%;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 320px;
-            height: 50px;
-            margin: 20px auto;
+            flex-direction: column;
         }
 
+        /*#chartSwitcher {*/
+            /*display: flex;*/
+            /*justify-content: space-between;*/
+            /*align-items: center;*/
+            /*width: 320px;*/
+            /*padding: 10px;*/
+            /*box-sizing: border-box;*/
+            /*height: 50px;*/
+            /*margin: 20px auto;*/
+            /*flex: 0 0 auto;*/
+        /*}*/
+
         .chartWrapper {
-            width: 100%;
-            height: 600px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            flex: 1 1 auto;
         }
 
         .svgWrapper {
-            border: 1px solid black;
-            width: 50%;
-            height: 50%;
+            width: 100%;
+            height: 100%;
             margin: auto;
             display: flex;
             align-items: stretch;
             justify-content: stretch;
             flex-direction: column;
         }
-
-        .svgWrapper > svg {
-            flex: 1 1 auto;
-        }
     </style>
 </head>
 <body>
-<div id="chartSwitcher"></div>
-<div class="chartWrapper">
-    <div class="svgWrapper"></div>
+<div class="main">
+    <div id="chartSwitcher"></div>
+    <div class="chartWrapper">
+
+    </div>
 </div>
 </body>
 </html>

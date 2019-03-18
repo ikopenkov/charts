@@ -5,7 +5,7 @@ type StyleSetterOptions = {
     replaceWholeStyleObject?: boolean;
 };
 const setElementStyle = (
-    element: HTMLElement,
+    element: HTMLElement | SVGElement,
     style: Omit<Partial<CSSStyleDeclaration>, 'length' | 'parentRule'>,
     options: StyleSetterOptions = {},
 ) => {

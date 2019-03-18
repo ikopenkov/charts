@@ -1,5 +1,6 @@
 import { ChartDataMock } from 'src/ChartDataMock';
 import { Chart } from 'src/components/Chart/Chart';
+import { DomUtils } from 'src/utils/DomUtils';
 // import { ChartData } from 'src/utils/ChartDataUtils/ChartData.types';
 
 // const mock: ChartData = {
@@ -19,19 +20,37 @@ import { Chart } from 'src/components/Chart/Chart';
 //     },
 // };
 
-const switcherEl = document.getElementById('chartSwitcher');
-ChartDataMock.forEach((mock, index) => {
-    const link = document.createElement('a');
-    link.innerText = String(index);
-    link.setAttribute('href', `#${index}`);
-    link.addEventListener('click', () => {
-        console.log('click');
-    });
-    switcherEl.appendChild(link);
-});
+// let chart: ChartInstance;
 
-const containerEl = document.getElementsByClassName(
-    'svgWrapper',
+// const switcherEl = document.getElementById('chartSwitcher');
+// ChartDataMock.forEach((mock, index) => {
+//     const link = document.createElement('a');
+//     link.innerText = String(index);
+//     link.setAttribute('href', `#${index}`);
+//     link.addEventListener('click', () => {
+//         chart.reRender({
+//             data: ChartDataMock[index],
+//         });
+//         console.log('click');
+//     });
+//     switcherEl.appendChild(link);
+// });
+
+const allChartsContainer = document.getElementsByClassName(
+    'chartWrapper',
 )[0] as HTMLDivElement;
-Chart.render(containerEl, ChartDataMock[0]);
-// Chart.render(containerEl, mock);
+
+ChartDataMock.forEach(data => {
+    const container = document.createElement('div');
+    DomUtils.setElementStyle(container, {
+        width: '100vw',
+        height: '100vh',
+    });
+
+    allChartsContainer.appendChild(container);
+
+    Chart.render({
+        container,
+        data,
+    });
+});

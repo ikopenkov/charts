@@ -54,3 +54,4 @@ const render = ({
 };
 
 export const PolyLine = ComponentUtils.create(render);
+export type PolyLineInstance = ReturnType<typeof PolyLine.render>;

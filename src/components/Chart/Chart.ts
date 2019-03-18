@@ -1,25 +1,56 @@
-import { PolyLine } from 'src/components/PolyLine/PolyLine';
+import { PolyLine, PolyLineInstance } from 'src/components/PolyLine/PolyLine';
 import { ChartDataUtils } from 'src/utils/ChartDataUtils/ChartDataUtils';
 import { ChartData } from 'src/utils/ChartDataUtils/ChartData.types';
 import { EventUtils } from 'src/utils/EventUtils';
-import { MousePointer } from 'src/components/MousePointer/MousePointer';
+import {
+    MousePointer,
+    MousePointerInstance,
+} from 'src/components/MousePointer/MousePointer';
 import { MathUtils } from 'src/utils/MathUtils/MathUtils';
-import { Grid } from 'src/components/Grid/Grid';
+import { Grid, GridInstance } from 'src/components/Grid/Grid';
+import { DomUtils } from 'src/utils/DomUtils';
+import { ComponentUtils } from 'src/utils/ComponentUtils';
 
 const renderDom = (container: HTMLElement) => {
     const mainContainer = document.createElement('div');
+    DomUtils.setElementStyle(mainContainer, {
+        height: '100%',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+    });
+
+    const headerContainer = document.createElement('div');
+    DomUtils.setElementStyle(headerContainer, {
+        padding: '15px 5px',
+        fontSize: '16px',
+        lineHeight: '1.2',
+        fontWeight: 'bold',
+    });
+    headerContainer.innerText = 'Some Header';
+
     const svgContainer = document.createElement('div');
+    DomUtils.setElementStyle(svgContainer, {
+        flex: '1 1 auto',
+    });
+
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    DomUtils.setElementStyle(svg, {
+        height: '100%',
+        width: '100%',
+    });
 
     svgContainer.style.position = 'relative';
 
     container.appendChild(mainContainer);
+    mainContainer.appendChild(headerContainer);
     mainContainer.appendChild(svgContainer);
     svgContainer.appendChild(svg);
 
     return {
         svg,
         mainContainer,
+        headerContainer,
         svgContainer,
     };
 };
@@ -31,11 +62,27 @@ const calcAspectRatio = (containerEl: Element) => {
     return containerWidth / containerHeight;
 };
 
-const render = (container: HTMLElement, data: ChartData) => {
+type Instance = {
+    grid: GridInstance;
+    polyLines: PolyLineInstance[];
+    mousePointer: MousePointerInstance;
+    mainContainer: HTMLElement;
+    headerContainer: HTMLElement;
+    svgContainer: HTMLElement;
+    svg: SVGSVGElement;
+};
+
+type Params = {
+    container: HTMLElement;
+    data: ChartData;
+    self?: Instance;
+};
+
+const render = ({ container, data, self }: Params) => {
     const sizesInPercent = {
         lineThin: 0.3,
-        lineBold: 0.7,
-        pointerCircleRadius: 1.5,
+        lineBold: 0.6,
+        pointerCircleRadius: 1.2,
         text: 4,
     };
 
@@ -48,109 +95,125 @@ const render = (container: HTMLElement, data: ChartData) => {
         background: '#fff',
     };
 
-    const {
-        svgContainer,
-        // mainContainer,
-        svg,
-    } = renderDom(container);
-
-    const aspectRatio = calcAspectRatio(svg);
-    svg.setAttribute('viewBox', `0 0 ${100 * aspectRatio} 100`);
-
-    const chartData = ChartDataUtils.transformDataToRender(data);
-
-    const grid = Grid.render({
-        svg,
-        aspectRatio,
-        style: {
-            textSizeInPercent: sizesInPercent.text,
-            lineColor: colors.horizontalScale,
-            lineWidthInPercent: sizesInPercent.lineThin,
-            textColor: colors.gridText,
-        },
-        chartData,
-    });
-
-    const { xColumn, yColumns } = chartData;
-
-    const xPointsPercentised = xColumn.pointsPercentised;
-
-    const polyLines = yColumns.map(column => {
-        return PolyLine.render({
-            svg,
-            widthInPercent: sizesInPercent.lineBold,
-            color: column.color,
-            xPointsInPercents: xPointsPercentised,
-            yPointsInPercents: column.pointsPercentised,
-            aspectRatio,
-        });
-    });
-
-    const handleResize = () => {
-        polyLines.forEach(polyLine => {
-            polyLine.reRender();
-        });
-        grid.reRender();
-    };
-
-    window.addEventListener(
-        'resize',
-        EventUtils.throttle(handleResize, 66),
-        false,
-    );
-
-    let currentX = 0;
-    const pointer = MousePointer.render({
-        container: svgContainer,
-        svg,
-        x: currentX,
-        aspectRatio,
-        chartData,
-        circleStyle: {
-            radiusInPercent: sizesInPercent.pointerCircleRadius,
-            strokeWidthInPercent: sizesInPercent.lineBold,
-            fillColor: colors.background,
-        },
-        rulerStyle: {
-            widthInPercent: sizesInPercent.lineThin,
-            color: colors.ruler,
-        },
-        captionStyle: {
-            backgroundColor: colors.background,
-            headerColor: colors.text,
-        },
-    });
-
-    svg.addEventListener('mousemove', event => {
-        const {
-            // top, height,
-            left,
-            width,
-        } = svg.getBoundingClientRect();
-        const mouseX = event.clientX;
-        // const mouseY = event.clientY;
-
-        const mouseRelX = mouseX - left;
-        // const mouseRelY = mouseY - top;
-
-        const mousePercentX = (mouseRelX / width) * 100;
-        // const mousePercentY = (mouseRelY / height) * 100;
-
-        const x = MathUtils.getNearestPoint(
-            chartData.xColumn.pointsPercentised,
-            mousePercentX,
+    let instance = self;
+    if (!instance) {
+        const { svgContainer, mainContainer, headerContainer, svg } = renderDom(
+            container,
         );
 
-        if (x !== currentX) {
-            currentX = x;
+        const aspectRatio = calcAspectRatio(svg);
 
-            pointer.reRender({
-                x,
+        svg.setAttribute('viewBox', `0 0 ${100 * aspectRatio} 100`);
+
+        const chartData = ChartDataUtils.transformDataToRender(data);
+
+        const grid = Grid.render({
+            svg,
+            aspectRatio,
+            style: {
+                textSizeInPercent: sizesInPercent.text,
+                lineColor: colors.horizontalScale,
+                lineWidthInPercent: sizesInPercent.lineThin,
+                textColor: colors.gridText,
+            },
+            chartData,
+        });
+
+        const { xColumn, yColumns } = chartData;
+
+        const xPointsPercentised = xColumn.pointsPercentised;
+
+        const polyLines = yColumns.map(column => {
+            return PolyLine.render({
+                svg,
+                widthInPercent: sizesInPercent.lineBold,
+                color: column.color,
+                xPointsInPercents: xPointsPercentised,
+                yPointsInPercents: column.pointsPercentised,
+                aspectRatio,
             });
-        }
-    });
+        });
+
+        const handleResize = () => {
+            polyLines.forEach(polyLine => {
+                polyLine.reRender();
+            });
+            grid.reRender();
+        };
+
+        window.addEventListener(
+            'resize',
+            EventUtils.throttle(handleResize, 66),
+            false,
+        );
+
+        let currentX = 0;
+        const mousePointer = MousePointer.render({
+            container: svgContainer,
+            svg,
+            x: currentX,
+            aspectRatio,
+            chartData,
+            circleStyle: {
+                radiusInPercent: sizesInPercent.pointerCircleRadius,
+                strokeWidthInPercent: sizesInPercent.lineBold,
+                fillColor: colors.background,
+            },
+            rulerStyle: {
+                widthInPercent: sizesInPercent.lineThin,
+                color: colors.ruler,
+            },
+            captionStyle: {
+                backgroundColor: colors.background,
+                headerColor: colors.text,
+            },
+        });
+
+        svg.addEventListener('mousemove', event => {
+            const {
+                // top, height,
+                left,
+                width,
+            } = svg.getBoundingClientRect();
+            const mouseX = event.clientX;
+            // const mouseY = event.clientY;
+
+            const mouseRelX = mouseX - left;
+            // const mouseRelY = mouseY - top;
+
+            const mousePercentX = (mouseRelX / width) * 100;
+            // const mousePercentY = (mouseRelY / height) * 100;
+
+            const x = MathUtils.getNearestPoint(
+                chartData.xColumn.pointsPercentised,
+                mousePercentX,
+            );
+
+            if (x !== currentX) {
+                currentX = x;
+
+                mousePointer.reRender({
+                    x,
+                });
+            }
+        });
+
+        instance = {
+            headerContainer,
+            svgContainer,
+            mainContainer,
+            svg,
+            polyLines,
+            grid,
+            mousePointer,
+        };
+    } else {
+        // no need this for contest, my be somewhen later
+    }
+
+    return instance;
 };
 
-export const Chart = {
-    render,
-};
+export const Chart = ComponentUtils.create(render);
+
+export type ChartInstance = ReturnType<typeof Chart.render>;
