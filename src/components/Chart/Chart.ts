@@ -32,25 +32,33 @@ const renderDom = (container: HTMLElement) => {
     const svgContainer = document.createElement('div');
     DomUtils.setElementStyle(svgContainer, {
         flex: '1 1 auto',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
     });
 
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     DomUtils.setElementStyle(svg, {
-        height: '100%',
-        width: '100%',
+        flex: '1 1 auto',
     });
 
-    svgContainer.style.position = 'relative';
+    const xScaleContainer = document.createElement('div');
+    DomUtils.setElementStyle(xScaleContainer, {
+        flex: '0 0 auto',
+        height: '30px',
+    });
 
     container.appendChild(mainContainer);
     mainContainer.appendChild(headerContainer);
     mainContainer.appendChild(svgContainer);
+    mainContainer.appendChild(xScaleContainer);
     svgContainer.appendChild(svg);
 
     return {
         svg,
         mainContainer,
         headerContainer,
+        xScaleContainer,
         svgContainer,
     };
 };
@@ -69,6 +77,7 @@ type Instance = {
     mainContainer: HTMLElement;
     headerContainer: HTMLElement;
     svgContainer: HTMLElement;
+    xScaleContainer: HTMLElement;
     svg: SVGSVGElement;
 };
 
@@ -97,9 +106,13 @@ const render = ({ container, data, self }: Params) => {
 
     let instance = self;
     if (!instance) {
-        const { svgContainer, mainContainer, headerContainer, svg } = renderDom(
-            container,
-        );
+        const {
+            svgContainer,
+            xScaleContainer,
+            mainContainer,
+            headerContainer,
+            svg,
+        } = renderDom(container);
 
         const aspectRatio = calcAspectRatio(svg);
 
@@ -116,6 +129,7 @@ const render = ({ container, data, self }: Params) => {
                 lineWidthInPercent: sizesInPercent.lineThin,
                 textColor: colors.gridText,
             },
+            container: xScaleContainer,
             chartData,
         });
 
@@ -133,19 +147,6 @@ const render = ({ container, data, self }: Params) => {
                 aspectRatio,
             });
         });
-
-        const handleResize = () => {
-            polyLines.forEach(polyLine => {
-                polyLine.reRender();
-            });
-            grid.reRender();
-        };
-
-        window.addEventListener(
-            'resize',
-            EventUtils.throttle(handleResize, 66),
-            false,
-        );
 
         let currentX = 0;
         const mousePointer = MousePointer.render({
@@ -194,13 +195,42 @@ const render = ({ container, data, self }: Params) => {
 
                 mousePointer.reRender({
                     x,
+                    aspectRatio: calcAspectRatio(svg),
                 });
             }
         });
 
+        const handleResize = () => {
+            // eslint-disable-next-line no-shadow
+            const aspectRatio = calcAspectRatio(svg);
+            svg.setAttribute('viewBox', `0 0 ${100 * aspectRatio} 100`);
+
+            polyLines.forEach(polyLine => {
+                polyLine.reRender({
+                    aspectRatio,
+                });
+            });
+            grid.reRender();
+
+            mousePointer.reRender({
+                aspectRatio,
+            });
+
+            grid.reRender({
+                aspectRatio,
+            });
+        };
+
+        window.addEventListener(
+            'resize',
+            EventUtils.throttle(handleResize, 66),
+            false,
+        );
+
         instance = {
             headerContainer,
             svgContainer,
+            xScaleContainer,
             mainContainer,
             svg,
             polyLines,

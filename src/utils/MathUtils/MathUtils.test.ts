@@ -158,3 +158,111 @@ describe('divideToRoundParts', () => {
     //     ).toEqual([0, 0.25, 0.5, 0.75, 1, 1.1]);
     // });
 });
+
+describe('divideToEqualParts', () => {
+    const calcPartsDeviance = ({
+        steps,
+        number,
+        minPart,
+    }: {
+        steps: number[];
+        number: number;
+        minPart: number;
+    }) => {
+        const isFirstStepCorrect = steps[0] === 0;
+        const isLastStepCorrect = steps[steps.length - 1] === number;
+
+        const stepsShifted = [0, ...steps];
+
+        const isAlwaysIncreasing = steps.every((step, index) => {
+            const nextStep = stepsShifted[index + 2];
+
+            if (index === 0 || index === steps.length - 1) {
+                return true;
+            }
+
+            return nextStep > step;
+        });
+
+        const difs = stepsShifted
+            .map((prev, index) => {
+                const current = steps[index];
+                return current - prev;
+            })
+            .slice(1, steps.length);
+
+        const minDif = Math.min(...difs);
+        const maxDif = Math.max(...difs);
+        const difDeviance = maxDif - minDif;
+
+        const medianDif =
+            difs.reduce((result, value) => {
+                return result + value;
+            }, 0) / difs.length;
+
+        return {
+            minDif,
+            maxDif,
+            difDeviance,
+            medianDif,
+            isFirstStepCorrect,
+            isLastStepCorrect,
+            isAlwaysIncreasing,
+        };
+    };
+
+    const checkIsCorrect = ({
+        number,
+        minPart,
+    }: {
+        number: number;
+        minPart: number;
+    }) => {
+        const steps = MathUtils.divideToEqualParts({
+            number,
+            minPart,
+        });
+
+        const {
+            difDeviance,
+            isLastStepCorrect,
+            isFirstStepCorrect,
+            isAlwaysIncreasing,
+        } = calcPartsDeviance({
+            steps,
+            minPart,
+            number,
+        });
+
+        expect(difDeviance).toBeGreaterThanOrEqual(0);
+        expect(difDeviance).toBeLessThanOrEqual(1);
+        expect(isLastStepCorrect).toBeTruthy();
+        expect(isFirstStepCorrect).toBeTruthy();
+        expect(isAlwaysIncreasing).toBeTruthy();
+    };
+
+    it('works', () => {
+        [
+            {
+                number: 300,
+                minPart: 16,
+            },
+            {
+                number: 452345234,
+                minPart: 234242,
+            },
+            {
+                number: 5234532,
+                minPart: 43343,
+            },
+            {
+                number: 12341216,
+                minPart: 123412,
+            },
+            {
+                number: 12423,
+                minPart: 5453,
+            },
+        ].forEach(checkIsCorrect);
+    });
+});

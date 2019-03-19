@@ -123,6 +123,32 @@ const divideToRoundParts = ({ max, min = 0, parts }: DividerParams) => {
     return result;
 };
 
+const divideToEqualParts = ({
+    number,
+    minPart,
+}: {
+    number: number;
+    minPart: number;
+}) => {
+    const rawDivider = number / minPart;
+    const target = Math.floor(rawDivider);
+    const k = (target * minPart - number) / -target;
+
+    // found k by inserting different values here to get round divider, than solve this equation to get upper formulae
+    const divider = number / (minPart + k);
+
+    const part = number / divider;
+
+    const stepsNumber = Math.ceil(number / minPart);
+
+    const steps = [];
+    for (let i = 0; i < stepsNumber; i++) {
+        steps.push(Math.round(i * part));
+    }
+
+    return steps;
+};
+
 //
 //
 // Used it to calc point on Y by X, but realised pointers should be rendered
@@ -158,4 +184,5 @@ export const MathUtils = {
     getBoundingPoints,
     getNearestPoint,
     divideToRoundParts,
+    divideToEqualParts,
 };

@@ -1,6 +1,9 @@
 import { ObjectUtils } from 'src/utils/ObjectUtils';
 
-const create = <I, RP extends { self?: I }>(render: (params: RP) => I) => {
+const create = <I, RP extends { self?: I }>(
+    render: (params: RP) => I,
+    remove?: (self: I) => void,
+) => {
     type RenderParams = RP;
     return {
         render: (renderParams: RenderParams) => {
@@ -22,6 +25,8 @@ const create = <I, RP extends { self?: I }>(render: (params: RP) => I) => {
 
                     render(fullParams);
                 },
+
+                remove: () => remove(self),
             };
         },
     };

@@ -103,7 +103,7 @@ const render = ({
         backgroundColor: style.backgroundColor,
         boxShadow: '0px 0px 3px 1px rgba(0, 0, 0, 0.1)',
         borderRadius: '5px',
-        top: '10%',
+        top: '0',
     });
 
     instance.headerEl.innerText = header;

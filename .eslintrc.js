@@ -26,6 +26,7 @@ module.exports = {
         'prettier/prettier': 'error',
 
         'func-names': ['error', 'never'],
+        'no-plusplus': 'off',
 
         'import/prefer-default-export': 'off',
         'import/no-default-export': 'error',

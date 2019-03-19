@@ -6,7 +6,7 @@ type Self = {
     text: HTMLElement;
 };
 
-export type ScaleStyle = {
+export type YScaleStyle = {
     textColor: string;
     lineColor: string;
     lineWidthInPercent: number;
@@ -17,10 +17,11 @@ type RenderParams = {
     yOriginal: number;
     yPercentised: number;
     svg: SVGSVGElement;
-    style: ScaleStyle;
+    style: YScaleStyle;
     aspectRatio: number;
     self?: Self;
 };
+
 const render = ({
     svg,
     aspectRatio,
@@ -82,6 +83,12 @@ const render = ({
     return instance;
 };
 
-export const Scale = ComponentUtils.create(render);
+const remove = (self: Self) => {
+    const { text, line } = self;
+    text.parentElement.removeChild(text);
+    line.parentElement.removeChild(line);
+};
 
-export type ScaleInstance = ReturnType<typeof Scale.render>;
+export const YScale = ComponentUtils.create(render, remove);
+
+export type YScaleInstance = ReturnType<typeof YScale.render>;
