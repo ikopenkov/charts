@@ -78,28 +78,27 @@ const render = ({
         };
     }
 
-    let xSafe = x - 10;
-    if (xSafe < 0) {
-        xSafe = 0;
+    const width = instance.rootEl.offsetWidth;
+    const containerWidth = container.offsetWidth;
+    const halfWidth = width / 2;
+    const pixelsInPercent = containerWidth / (100 * aspectRatio);
+    const xProportionated = x * aspectRatio;
+    const xPx = xProportionated * pixelsInPercent;
+
+    const leftSideX = xPx - halfWidth;
+
+    let missingLeft = 0;
+    if (leftSideX < 0) {
+        missingLeft = leftSideX;
     }
-    const rightOffsetPx =
-        container.clientWidth -
-        ((xSafe * container.clientWidth) / 100 + instance.rootEl.offsetWidth);
-    if (rightOffsetPx <= 0) {
-        DomUtils.setElementStyle(instance.rootEl, {
-            left: 'auto',
-            right: '0',
-        });
-    } else {
-        DomUtils.setElementStyle(instance.rootEl, {
-            left: `${xSafe}%`,
-            right: 'auto',
-        });
-    }
+    const rightSideX = leftSideX + width;
+    const needStickToRight = rightSideX > containerWidth;
 
     DomUtils.setElementStyle(instance.rootEl, {
         padding: '5px 10px',
         position: 'absolute',
+        right: needStickToRight ? '0' : 'auto',
+        left: needStickToRight ? 'auto' : `${leftSideX - missingLeft}px`,
         backgroundColor: style.backgroundColor,
         boxShadow: '0px 0px 3px 1px rgba(0, 0, 0, 0.1)',
         borderRadius: '5px',
