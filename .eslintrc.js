@@ -27,6 +27,7 @@ module.exports = {
 
         'func-names': ['error', 'never'],
         'no-plusplus': 'off',
+        'no-use-before-define': 'off', // have the same in @typescript-eslint
 
         'import/prefer-default-export': 'off',
         'import/no-default-export': 'error',

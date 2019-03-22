@@ -43,7 +43,7 @@ const allChartsContainer = document.getElementsByClassName(
 ChartDataMock.forEach(data => {
     const container = document.createElement('div');
     DomUtils.setElementStyle(container, {
-        width: '100vw',
+        width: '100%',
         height: '100vh',
     });
 

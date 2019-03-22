@@ -19,6 +19,19 @@ const setElementStyle = (
     }, style);
 };
 
+const createSvgElement = <T extends SVGElement>(name: string) => {
+    return document.createElementNS('http://www.w3.org/2000/svg', name) as T;
+};
+
+const getAspectRatio = (containerEl: Element) => {
+    const containerWidth = containerEl.clientWidth;
+    const containerHeight = containerEl.clientHeight;
+
+    return containerWidth / containerHeight;
+};
+
 export const DomUtils = {
     setElementStyle,
+    createSvgElement,
+    getAspectRatio,
 };

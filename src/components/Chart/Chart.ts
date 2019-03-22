@@ -10,6 +10,7 @@ import { MathUtils } from 'src/utils/MathUtils/MathUtils';
 import { Grid, GridInstance } from 'src/components/Grid/Grid';
 import { DomUtils } from 'src/utils/DomUtils';
 import { ComponentUtils } from 'src/utils/ComponentUtils';
+import { RangeSelector } from 'src/components/RangeSelector/RangeSelector';
 
 const renderDom = (container: HTMLElement) => {
     const mainContainer = document.createElement('div');
@@ -48,10 +49,20 @@ const renderDom = (container: HTMLElement) => {
         height: '30px',
     });
 
+    const rangeSelectorContainer = document.createElement('div');
+    DomUtils.setElementStyle(rangeSelectorContainer, {
+        flex: '0 0 auto',
+        height: '60px',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+    });
+
     container.appendChild(mainContainer);
     mainContainer.appendChild(headerContainer);
     mainContainer.appendChild(svgContainer);
     mainContainer.appendChild(xScaleContainer);
+    mainContainer.appendChild(rangeSelectorContainer);
     svgContainer.appendChild(svg);
 
     return {
@@ -59,15 +70,9 @@ const renderDom = (container: HTMLElement) => {
         mainContainer,
         headerContainer,
         xScaleContainer,
+        rangeSelectorContainer,
         svgContainer,
     };
-};
-
-const calcAspectRatio = (containerEl: Element) => {
-    const containerWidth = containerEl.clientWidth;
-    const containerHeight = containerEl.clientHeight;
-
-    return containerWidth / containerHeight;
 };
 
 type Instance = {
@@ -76,8 +81,9 @@ type Instance = {
     mousePointer: MousePointerInstance;
     mainContainer: HTMLElement;
     headerContainer: HTMLElement;
-    svgContainer: HTMLElement;
     xScaleContainer: HTMLElement;
+    rangeSelectorContainer: HTMLElement;
+    svgContainer: HTMLElement;
     svg: SVGSVGElement;
 };
 
@@ -111,10 +117,11 @@ const render = ({ container, data, self }: Params) => {
             xScaleContainer,
             mainContainer,
             headerContainer,
+            rangeSelectorContainer,
             svg,
         } = renderDom(container);
 
-        const aspectRatio = calcAspectRatio(svg);
+        const aspectRatio = DomUtils.getAspectRatio(svg);
 
         svg.setAttribute('viewBox', `0 0 ${100 * aspectRatio} 100`);
 
@@ -140,7 +147,6 @@ const render = ({ container, data, self }: Params) => {
         const polyLines = yColumns.map(column => {
             return PolyLine.render({
                 svg,
-                widthInPercent: sizesInPercent.lineBold,
                 color: column.color,
                 xPointsInPercents: xPointsPercentised,
                 yPointsInPercents: column.pointsPercentised,
@@ -195,14 +201,19 @@ const render = ({ container, data, self }: Params) => {
 
                 mousePointer.reRender({
                     x,
-                    aspectRatio: calcAspectRatio(svg),
+                    aspectRatio: DomUtils.getAspectRatio(svg),
                 });
             }
         });
 
+        const rangeSelector = RangeSelector.render({
+            chartData,
+            container: rangeSelectorContainer,
+        });
+
         const handleResize = () => {
             // eslint-disable-next-line no-shadow
-            const aspectRatio = calcAspectRatio(svg);
+            const aspectRatio = DomUtils.getAspectRatio(svg);
             svg.setAttribute('viewBox', `0 0 ${100 * aspectRatio} 100`);
 
             polyLines.forEach(polyLine => {
@@ -210,7 +221,6 @@ const render = ({ container, data, self }: Params) => {
                     aspectRatio,
                 });
             });
-            grid.reRender();
 
             mousePointer.reRender({
                 aspectRatio,
@@ -219,6 +229,8 @@ const render = ({ container, data, self }: Params) => {
             grid.reRender({
                 aspectRatio,
             });
+
+            rangeSelector.reRender();
         };
 
         window.addEventListener(
@@ -232,13 +244,14 @@ const render = ({ container, data, self }: Params) => {
             svgContainer,
             xScaleContainer,
             mainContainer,
+            rangeSelectorContainer,
             svg,
             polyLines,
             grid,
             mousePointer,
         };
     } else {
-        // no need this for contest, my be somewhen later
+        // no need this for contest, may be somewhen later
     }
 
     return instance;

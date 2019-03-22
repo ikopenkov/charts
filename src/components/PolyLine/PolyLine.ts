@@ -1,4 +1,5 @@
 import { ComponentUtils } from 'src/utils/ComponentUtils';
+import { StyleUtils } from 'src/utils/StyleUtils';
 
 const calcPathData = (
     xPointsInPercents: number[],
@@ -20,18 +21,18 @@ type RenderParams = {
     color: string;
     svg: SVGSVGElement;
     aspectRatio: number;
-    widthInPercent: number;
+    isThin?: boolean;
     self?: SVGPathElement;
 };
 
 const render = ({
     xPointsInPercents,
     yPointsInPercents,
-    widthInPercent,
     color,
     svg,
-    self,
     aspectRatio,
+    isThin = false,
+    self,
 }: RenderParams) => {
     const pathData = calcPathData(
         xPointsInPercents,
@@ -45,13 +46,25 @@ const render = ({
         svg.appendChild(path);
     }
 
+    const sizesInPercent = StyleUtils.getSizesInPercents(
+        svg.clientWidth,
+        aspectRatio,
+    );
+    const strokeWidth = isThin
+        ? sizesInPercent.lineThin
+        : sizesInPercent.lineBold;
+
     path.setAttribute('stroke', color);
-    path.setAttribute('stroke-width', String(widthInPercent));
+    path.setAttribute('stroke-width', String(strokeWidth));
     path.setAttribute('fill', 'none');
     path.setAttribute('d', pathData);
 
     return path;
 };
 
-export const PolyLine = ComponentUtils.create(render);
+const remove = (self: SVGPathElement) => {
+    self.parentElement.removeChild(self);
+};
+
+export const PolyLine = ComponentUtils.create(render, remove);
 export type PolyLineInstance = ReturnType<typeof PolyLine.render>;
