@@ -1,4 +1,5 @@
 import { ComponentUtils } from 'src/utils/ComponentUtils';
+import { DomUtils } from 'src/utils/DomUtils';
 
 type RenderParams = {
     x: number;
@@ -6,6 +7,7 @@ type RenderParams = {
     svg: SVGSVGElement;
     aspectRatio: number;
     widthInPercent: number;
+    isVisible: boolean;
     self?: SVGLineElement;
 };
 const render = ({
@@ -14,6 +16,7 @@ const render = ({
     color,
     x,
     aspectRatio,
+    isVisible,
     self,
 }: RenderParams) => {
     let line = self;
@@ -21,17 +24,22 @@ const render = ({
         line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         svg.appendChild(line);
     }
-    const xProportionated = x * aspectRatio;
+    if (isVisible) {
+        const xProportionated = x * aspectRatio;
 
-    line.setAttribute('x1', String(xProportionated));
-    line.setAttribute('x2', String(xProportionated));
-    line.setAttribute('y1', '0');
-    line.setAttribute('y2', '100');
-    line.setAttribute(
-        'style',
-        `stroke:${color};stroke-width:${widthInPercent}`,
-    );
+        line.setAttribute('x1', String(xProportionated));
+        line.setAttribute('x2', String(xProportionated));
+        line.setAttribute('y1', '0');
+        line.setAttribute('y2', '100');
+        line.setAttribute(
+            'style',
+            `stroke:${color};stroke-width:${widthInPercent}`,
+        );
 
+        DomUtils.setElementStyle(line, { display: '' });
+    } else {
+        DomUtils.setElementStyle(line, { display: 'none' });
+    }
     return line;
 };
 

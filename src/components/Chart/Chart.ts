@@ -85,7 +85,7 @@ const renderDom = (container: HTMLElement) => {
     };
 };
 
-const handleMouseMove = (event: MouseEvent, params: Required<Params>) => {
+const handleMouseMove = (event: PointerEvent, params: Required<Params>) => {
     const { self } = params;
     const { svg, currentPointerX, mousePointer } = self;
     const {
@@ -106,10 +106,17 @@ const handleMouseMove = (event: MouseEvent, params: Required<Params>) => {
         self.currentPointerX = mousePercentX;
 
         mousePointer.reRender({
+            isVisible: true,
             xPercent: mousePercentX,
             aspectRatio: DomUtils.getAspectRatio(svg),
         });
     }
+};
+
+const handleMouseLeave = (event: PointerEvent, params: Required<Params>) => {
+    const { self } = params;
+    const { mousePointer } = self;
+    mousePointer.reRender({ isVisible: false });
 };
 
 const handleResize = (params: Required<Params>) => {
@@ -268,6 +275,7 @@ const render = (params: Params) => {
                 backgroundColor: colors.background,
                 headerColor: colors.text,
             },
+            isVisible: false,
         });
 
         const rangeSelectorChangeHandlerWrapper = {
@@ -301,8 +309,14 @@ const render = (params: Params) => {
         rangeSelectorChangeHandlerWrapper.onChange = (x1: number, x2: number) =>
             handleRangeSelectionChange(x1, x2, { ...params, self: instance });
 
-        svg.addEventListener('mousemove', event =>
+        svg.addEventListener('pointermove', event =>
             handleMouseMove(event, {
+                ...params,
+                self: instance,
+            }),
+        );
+        svg.addEventListener('pointerleave', event =>
+            handleMouseLeave(event, {
                 ...params,
                 self: instance,
             }),

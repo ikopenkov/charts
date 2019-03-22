@@ -39,6 +39,7 @@ type RenderParams = {
         radiusInPercent: number;
     };
     captionStyle: CaptionStyle;
+    isVisible: boolean;
     self?: Instance;
 };
 const render = ({
@@ -50,6 +51,7 @@ const render = ({
     circleStyle,
     rulerStyle,
     captionStyle,
+    isVisible,
     self,
 }: RenderParams) => {
     const xPoint = MathUtils.getNearestPoint(
@@ -80,6 +82,7 @@ const render = ({
             aspectRatio,
             svg,
             color: '#DFE6EB',
+            isVisible,
             ...rulerStyle,
         });
 
@@ -91,6 +94,7 @@ const render = ({
                 y: yValuesPercentised[index],
                 color: yColumn.color,
                 svg,
+                isVisible,
                 ...circleStyle,
             });
         });
@@ -103,6 +107,7 @@ const render = ({
             chartData,
             header: getDateFormatted(xOriginal),
             yValuesOriginal,
+            isVisible,
         });
         instance = {
             circles,
@@ -116,12 +121,14 @@ const render = ({
                 x: xPoint,
                 aspectRatio,
                 y: yValuesPercentised[index],
+                isVisible,
                 ...circleStyle,
             });
         });
         instance.ruler.reRender({
             aspectRatio,
             x: xPoint,
+            isVisible,
             ...rulerStyle,
         });
         instance.caption.reRender({
@@ -132,6 +139,7 @@ const render = ({
             chartData,
             style: captionStyle,
             container,
+            isVisible,
         });
     }
 

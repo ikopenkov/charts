@@ -1,4 +1,5 @@
 import { ComponentUtils } from 'src/utils/ComponentUtils';
+import { DomUtils } from 'src/utils/DomUtils';
 
 type RenderParams = {
     x: number;
@@ -9,6 +10,7 @@ type RenderParams = {
     fillColor: string;
     svg: SVGSVGElement;
     aspectRatio: number;
+    isVisible: boolean;
     self?: SVGCircleElement;
 };
 const render = ({
@@ -20,6 +22,7 @@ const render = ({
     x,
     y,
     aspectRatio,
+    isVisible,
     self,
 }: RenderParams) => {
     let circle = self;
@@ -31,14 +34,19 @@ const render = ({
         svg.appendChild(circle);
     }
 
-    const xProportionated = x * aspectRatio;
+    if (isVisible) {
+        const xProportionated = x * aspectRatio;
 
-    circle.setAttribute('cx', String(xProportionated));
-    circle.setAttribute('cy', String(y));
-    circle.setAttribute('r', String(radiusInPercent));
-    circle.setAttribute('stroke', color);
-    circle.setAttribute('stroke-width', String(strokeWidthInPercent));
-    circle.setAttribute('fill', fillColor);
+        circle.setAttribute('cx', String(xProportionated));
+        circle.setAttribute('cy', String(y));
+        circle.setAttribute('r', String(radiusInPercent));
+        circle.setAttribute('stroke', color);
+        circle.setAttribute('stroke-width', String(strokeWidthInPercent));
+        circle.setAttribute('fill', fillColor);
+        DomUtils.setElementStyle(circle, { display: '' });
+    } else {
+        DomUtils.setElementStyle(circle, { display: 'none' });
+    }
 
     return circle;
 };
