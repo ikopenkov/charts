@@ -6,10 +6,9 @@ import { EventUtils } from 'src/utils/EventUtils';
 const borderWidthPx = 5;
 const rangerMinWidth = 10;
 
-const setCursorStyleGlobally = (type: string | undefined) => {
-    DomUtils.setElementStyle(document.body, {
-        cursor: type,
-    });
+const handleGrabStart = (cursor: string) => {
+    DomUtils.setCursorGlobally(cursor);
+    DomUtils.setUserSelectDisabled(true);
 };
 
 const handleGrab = (
@@ -77,7 +76,8 @@ const handleGrab = (
 };
 
 const handleGrabEnd = (renderParams: Required<RenderParams>) => {
-    setCursorStyleGlobally(undefined);
+    DomUtils.setCursorGlobally('');
+    DomUtils.setUserSelectDisabled(false);
 
     const { self } = renderParams;
     self.x1Initial = self.x1;
@@ -206,7 +206,7 @@ const render = (params: RenderParams) => {
 
         EventUtils.addGrabListener({
             element: rangerEl,
-            onGrabStart: () => setCursorStyleGlobally('grab'),
+            onGrabStart: () => handleGrabStart('grab'),
             onGrab: ({ xOffset }) =>
                 handleGrab(xOffset, paramsWithInstance, {
                     x1Resize: true,
@@ -218,7 +218,7 @@ const render = (params: RenderParams) => {
         borders.forEach((borderEl, index) => {
             EventUtils.addGrabListener({
                 element: borderEl,
-                onGrabStart: () => setCursorStyleGlobally('ew-resize'),
+                onGrabStart: () => handleGrabStart('ew-resize'),
                 onGrab: ({ xOffset }) =>
                     handleGrab(xOffset, paramsWithInstance, {
                         x1Resize: index === 0,

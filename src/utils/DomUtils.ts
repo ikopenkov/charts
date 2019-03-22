@@ -4,9 +4,13 @@ import { Omit } from 'src/utils/Types';
 type StyleSetterOptions = {
     replaceWholeStyleObject?: boolean;
 };
+type PartialCSSStyleDeclaration = Omit<
+    Partial<CSSStyleDeclaration>,
+    'length' | 'parentRule'
+>;
 const setElementStyle = (
     element: HTMLElement | SVGElement,
-    style: Omit<Partial<CSSStyleDeclaration>, 'length' | 'parentRule'>,
+    style: PartialCSSStyleDeclaration,
     options: StyleSetterOptions = {},
 ) => {
     if (options.replaceWholeStyleObject) {
@@ -30,8 +34,31 @@ const getAspectRatio = (containerEl: Element) => {
     return containerWidth / containerHeight;
 };
 
+const setGlobalStyle = (style: PartialCSSStyleDeclaration) => {
+    setElementStyle(document.body, style);
+};
+
+const setCursorGlobally = (type: string) => {
+    setGlobalStyle({
+        cursor: type,
+    });
+};
+const setUserSelectDisabled = (isDisabled: boolean) => {
+    const value = isDisabled ? 'none' : '';
+
+    setGlobalStyle({
+        userSelect: value,
+        msUserSelect: value,
+        webkitUserSelect: value,
+        msTouchSelect: value,
+    });
+};
+
 export const DomUtils = {
     setElementStyle,
+    setGlobalStyle,
     createSvgElement,
     getAspectRatio,
+    setCursorGlobally,
+    setUserSelectDisabled,
 };
