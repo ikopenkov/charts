@@ -3,6 +3,7 @@ import { ChartRenderData } from 'src/utils/ChartDataUtils/ChartData.types';
 import { PolyLine, PolyLineInstance } from 'src/components/PolyLine/PolyLine';
 import { DomUtils } from 'src/utils/DomUtils';
 import {
+    ChangeHandler,
     SelectionOverlay,
     SelectionOverlayInstance,
 } from 'src/components/RangeSelector/_SelectionOverlay';
@@ -16,10 +17,20 @@ type Self = {
 type RenderParams = {
     chartData: ChartRenderData;
     container: HTMLElement;
+    onChange: ChangeHandler;
+    initialX1: number;
+    initialX2: number;
     self?: Self;
 };
 
-const render = ({ container, chartData, self }: RenderParams) => {
+const render = ({
+    container,
+    initialX1,
+    initialX2,
+    onChange,
+    chartData,
+    self,
+}: RenderParams) => {
     const aspectRatio = DomUtils.getAspectRatio(container);
 
     const polyLinesData = chartData.yColumns.map(yCol => ({
@@ -44,7 +55,9 @@ const render = ({ container, chartData, self }: RenderParams) => {
 
         const selectionOverlay = SelectionOverlay.render({
             container,
-            onChange: () => {},
+            onChange,
+            initialX1,
+            initialX2,
         });
 
         instance = {

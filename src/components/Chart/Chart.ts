@@ -1,16 +1,26 @@
 import { PolyLine, PolyLineInstance } from 'src/components/PolyLine/PolyLine';
 import { ChartDataUtils } from 'src/utils/ChartDataUtils/ChartDataUtils';
-import { ChartData } from 'src/utils/ChartDataUtils/ChartData.types';
+import {
+    ChartData,
+    ChartRenderData,
+} from 'src/utils/ChartDataUtils/ChartData.types';
 import { EventUtils } from 'src/utils/EventUtils';
 import {
     MousePointer,
     MousePointerInstance,
 } from 'src/components/MousePointer/MousePointer';
-import { MathUtils } from 'src/utils/MathUtils/MathUtils';
 import { Grid, GridInstance } from 'src/components/Grid/Grid';
 import { DomUtils } from 'src/utils/DomUtils';
 import { ComponentUtils } from 'src/utils/ComponentUtils';
-import { RangeSelector } from 'src/components/RangeSelector/RangeSelector';
+import {
+    RangeSelector,
+    RangeSelectorInstance,
+} from 'src/components/RangeSelector/RangeSelector';
+
+const InitialData = {
+    rangeXMinPercent: 70,
+    rangeXMaxPercent: 100,
+};
 
 const renderDom = (container: HTMLElement) => {
     const mainContainer = document.createElement('div');
@@ -75,6 +85,83 @@ const renderDom = (container: HTMLElement) => {
     };
 };
 
+const handleMouseMove = (event: MouseEvent, params: Required<Params>) => {
+    const { self } = params;
+    const { svg, currentPointerX, mousePointer } = self;
+    const {
+        // top, height,
+        left,
+        width,
+    } = svg.getBoundingClientRect();
+    const mouseX = event.clientX;
+    // const mouseY = event.clientY;
+
+    const mouseRelX = mouseX - left;
+    // const mouseRelY = mouseY - top;
+
+    const mousePercentX = (mouseRelX / width) * 100;
+    // const mousePercentY = (mouseRelY / height) * 100;
+
+    if (mousePercentX !== currentPointerX) {
+        self.currentPointerX = mousePercentX;
+
+        mousePointer.reRender({
+            xPercent: mousePercentX,
+            aspectRatio: DomUtils.getAspectRatio(svg),
+        });
+    }
+};
+
+const handleResize = (params: Required<Params>) => {
+    const { self } = params;
+    const { svg, polyLines, grid, rangeSelector, mousePointer } = self;
+
+    // eslint-disable-next-line no-shadow
+    const aspectRatio = DomUtils.getAspectRatio(svg);
+    svg.setAttribute('viewBox', `0 0 ${100 * aspectRatio} 100`);
+
+    polyLines.forEach(polyLine => {
+        polyLine.reRender({
+            aspectRatio,
+        });
+    });
+
+    mousePointer.reRender({
+        aspectRatio,
+    });
+
+    grid.reRender({
+        aspectRatio,
+    });
+
+    rangeSelector.reRender();
+};
+
+const handleRangeSelectionChange = (
+    xMinPercent: number,
+    xMaxPercent: number,
+    params: Required<Params>,
+) => {
+    const { self } = params;
+    const { grid, polyLines, mousePointer } = self;
+
+    const chartData = ChartDataUtils.transformDataToRender(params.data, {
+        xMinPercent,
+        xMaxPercent,
+    });
+
+    grid.reRender({ chartData });
+    polyLines.forEach((polyLine, index) =>
+        polyLine.reRender({
+            xPointsInPercents: chartData.xColumn.pointsPercentised,
+            yPointsInPercents: chartData.yColumns[index].pointsPercentised,
+        }),
+    );
+    mousePointer.reRender({ chartData });
+
+    self.chartData = chartData;
+};
+
 type Instance = {
     grid: GridInstance;
     polyLines: PolyLineInstance[];
@@ -83,8 +170,11 @@ type Instance = {
     headerContainer: HTMLElement;
     xScaleContainer: HTMLElement;
     rangeSelectorContainer: HTMLElement;
+    rangeSelector: RangeSelectorInstance;
     svgContainer: HTMLElement;
     svg: SVGSVGElement;
+    chartData: ChartRenderData;
+    currentPointerX: number;
 };
 
 type Params = {
@@ -93,7 +183,8 @@ type Params = {
     self?: Instance;
 };
 
-const render = ({ container, data, self }: Params) => {
+const render = (params: Params) => {
+    const { container, data, self } = params;
     const sizesInPercent = {
         lineThin: 0.3,
         lineBold: 0.6,
@@ -125,7 +216,10 @@ const render = ({ container, data, self }: Params) => {
 
         svg.setAttribute('viewBox', `0 0 ${100 * aspectRatio} 100`);
 
-        const chartData = ChartDataUtils.transformDataToRender(data);
+        const chartData = ChartDataUtils.transformDataToRender(data, {
+            xMinPercent: InitialData.rangeXMinPercent,
+            xMaxPercent: InitialData.rangeXMaxPercent,
+        });
 
         const grid = Grid.render({
             svg,
@@ -154,11 +248,11 @@ const render = ({ container, data, self }: Params) => {
             });
         });
 
-        let currentX = 0;
+        const currentPointerX = 0;
         const mousePointer = MousePointer.render({
             container: svgContainer,
             svg,
-            x: currentX,
+            xPercent: currentPointerX,
             aspectRatio,
             chartData,
             circleStyle: {
@@ -176,68 +270,18 @@ const render = ({ container, data, self }: Params) => {
             },
         });
 
-        svg.addEventListener('mousemove', event => {
-            const {
-                // top, height,
-                left,
-                width,
-            } = svg.getBoundingClientRect();
-            const mouseX = event.clientX;
-            // const mouseY = event.clientY;
-
-            const mouseRelX = mouseX - left;
-            // const mouseRelY = mouseY - top;
-
-            const mousePercentX = (mouseRelX / width) * 100;
-            // const mousePercentY = (mouseRelY / height) * 100;
-
-            const x = MathUtils.getNearestPoint(
-                chartData.xColumn.pointsPercentised,
-                mousePercentX,
-            );
-
-            if (x !== currentX) {
-                currentX = x;
-
-                mousePointer.reRender({
-                    x,
-                    aspectRatio: DomUtils.getAspectRatio(svg),
-                });
-            }
-        });
-
-        const rangeSelector = RangeSelector.render({
-            chartData,
-            container: rangeSelectorContainer,
-        });
-
-        const handleResize = () => {
-            // eslint-disable-next-line no-shadow
-            const aspectRatio = DomUtils.getAspectRatio(svg);
-            svg.setAttribute('viewBox', `0 0 ${100 * aspectRatio} 100`);
-
-            polyLines.forEach(polyLine => {
-                polyLine.reRender({
-                    aspectRatio,
-                });
-            });
-
-            mousePointer.reRender({
-                aspectRatio,
-            });
-
-            grid.reRender({
-                aspectRatio,
-            });
-
-            rangeSelector.reRender();
+        const rangeSelectorChangeHandlerWrapper = {
+            onChange: (x1: number, x2: number) => {},
         };
-
-        window.addEventListener(
-            'resize',
-            EventUtils.throttle(handleResize, 66),
-            false,
-        );
+        const chartDataUncut = ChartDataUtils.transformDataToRender(data);
+        const rangeSelector = RangeSelector.render({
+            chartData: chartDataUncut,
+            container: rangeSelectorContainer,
+            onChange: (x1, x2) =>
+                rangeSelectorChangeHandlerWrapper.onChange(x1, x2),
+            initialX1: InitialData.rangeXMinPercent,
+            initialX2: InitialData.rangeXMaxPercent,
+        });
 
         instance = {
             headerContainer,
@@ -249,7 +293,29 @@ const render = ({ container, data, self }: Params) => {
             polyLines,
             grid,
             mousePointer,
+            currentPointerX,
+            chartData,
+            rangeSelector,
         };
+
+        rangeSelectorChangeHandlerWrapper.onChange = (x1: number, x2: number) =>
+            handleRangeSelectionChange(x1, x2, { ...params, self: instance });
+
+        svg.addEventListener('mousemove', event =>
+            handleMouseMove(event, {
+                ...params,
+                self: instance,
+            }),
+        );
+
+        window.addEventListener(
+            'resize',
+            EventUtils.throttle(
+                () => handleResize({ ...params, self: instance }),
+                66,
+            ),
+            false,
+        );
     } else {
         // no need this for contest, may be somewhen later
     }

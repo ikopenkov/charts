@@ -23,6 +23,9 @@ const create = <I, RP extends { self?: I }>(
                     }, renderParams);
                     fullParams.self = self;
 
+                    // eslint-disable-next-line no-param-reassign
+                    renderParams = fullParams;
+
                     render(fullParams);
                 },
 

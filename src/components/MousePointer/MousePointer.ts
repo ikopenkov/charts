@@ -8,6 +8,7 @@ import {
     CaptionStyle,
 } from 'src/components/MousePointer/_Caption';
 import { ChartDataUtils } from 'src/utils/ChartDataUtils/ChartDataUtils';
+import { MathUtils } from 'src/utils/MathUtils/MathUtils';
 
 const getDateFormatted = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -23,7 +24,7 @@ type Instance = {
 };
 
 type RenderParams = {
-    x: number;
+    xPercent: number;
     chartData: ChartRenderData;
     container: HTMLElement;
     svg: SVGSVGElement;
@@ -44,21 +45,26 @@ const render = ({
     svg,
     container,
     chartData,
-    x,
+    xPercent,
     aspectRatio,
     circleStyle,
     rulerStyle,
     captionStyle,
     self,
 }: RenderParams) => {
+    const xPoint = MathUtils.getNearestPoint(
+        chartData.xColumn.pointsPercentised,
+        xPercent,
+    );
+
     const xOriginal = ChartDataUtils.unpercentise({
         min: chartData.extremums.xMin,
         max: chartData.extremums.xMax,
-        percent: x,
+        percent: xPercent,
         isY: false,
     });
 
-    const xIndex = chartData.xColumn.pointsPercentised.indexOf(x);
+    const xIndex = chartData.xColumn.pointsPercentised.indexOf(xPoint);
 
     const yValuesPercentised = chartData.yColumns.map(
         col => col.pointsPercentised[xIndex],
@@ -70,7 +76,7 @@ const render = ({
     let instance = self;
     if (!instance) {
         const ruler = Ruler.render({
-            x,
+            x: xPoint,
             aspectRatio,
             svg,
             color: '#DFE6EB',
@@ -81,7 +87,7 @@ const render = ({
             yValuesPercentised.push();
             return Circle.render({
                 aspectRatio,
-                x,
+                x: xPoint,
                 y: yValuesPercentised[index],
                 color: yColumn.color,
                 svg,
@@ -90,7 +96,7 @@ const render = ({
         });
 
         const caption = Caption.render({
-            x,
+            x: xPoint,
             aspectRatio,
             container,
             style: captionStyle,
@@ -107,7 +113,7 @@ const render = ({
         chartData.yColumns.forEach((yColumn, index) => {
             const circle = instance.circles[index];
             circle.reRender({
-                x,
+                x: xPoint,
                 aspectRatio,
                 y: yValuesPercentised[index],
                 ...circleStyle,
@@ -115,12 +121,12 @@ const render = ({
         });
         instance.ruler.reRender({
             aspectRatio,
-            x,
+            x: xPoint,
             ...rulerStyle,
         });
         instance.caption.reRender({
             aspectRatio,
-            x,
+            x: xPoint,
             header: getDateFormatted(xOriginal),
             yValuesOriginal,
             chartData,

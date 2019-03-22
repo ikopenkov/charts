@@ -21,6 +21,8 @@ const handleGrab = (
     // context losing & requirement of much same arguments in such functions.
     // eslint-disable-next-line sonarjs/cognitive-complexity
 ) => {
+    const direction: 'left' | 'right' = xOffset < 0 ? 'left' : 'right';
+
     const { self, container } = renderParams;
     const { x1Initial, x2Initial } = self;
     const pxInPercent = container.clientWidth / 100;
@@ -39,12 +41,12 @@ const handleGrab = (
 
     const newWidth = newX2 - newX1;
     if (options.x1Resize && options.x2Resize) {
-        const inititalWidth = self.x2Initial - self.x1Initial;
-        const widthDif = inititalWidth - newWidth;
-        if (newX1 === 0) {
+        const initialWidth = self.x2Initial - self.x1Initial;
+        const widthDif = initialWidth - newWidth;
+        if (direction === 'left' && newX1 === 0) {
             newX2 += widthDif;
         }
-        if (newX2 === 100) {
+        if (direction === 'right' && newX2 === 100) {
             newX1 -= widthDif;
         }
     } else {
@@ -72,6 +74,8 @@ const handleGrab = (
             ...renderParams,
             self,
         });
+
+        renderParams.onChange(self.x1, self.x2);
     }
 };
 
@@ -160,22 +164,26 @@ type Self = {
     x2Initial: number;
 };
 
+export type ChangeHandler = (x1: number, x2: number) => void;
+
 type RenderParams = {
     container: HTMLElement;
     self?: Self;
-    onChange: (x1: number, x2: number) => void;
+    onChange: ChangeHandler;
+    initialX1: number;
+    initialX2: number;
 };
 
 const render = (params: RenderParams) => {
-    const { self, container } = params;
+    const { self, container, initialX1, initialX2 } = params;
 
     let instance = self;
     if (!instance) {
         const rangerEl = document.createElement('div');
         container.appendChild(rangerEl);
 
-        const x1 = 30;
-        const x2 = 80;
+        const x1 = initialX1;
+        const x2 = initialX2;
 
         const borders = [x1, x2].map(() => {
             const border = document.createElement('div');

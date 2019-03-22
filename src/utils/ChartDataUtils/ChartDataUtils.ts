@@ -1,5 +1,6 @@
 import { StringKeyMap } from 'src/utils/Types';
 import { ObjectUtils } from 'src/utils/ObjectUtils';
+import { ArrayUtils } from 'src/utils/ArrayUtils/ArrayUtils';
 import {
     ChartData,
     ChartRenderData,
@@ -82,21 +83,42 @@ const calcExtremums = (columns: ColumnData[], types: ColumnTypes) => {
     } as Extremums;
 };
 
-const transformDataToRender = (chartData: ChartData) => {
-    const pointsByKey = mapPointsByKeys(chartData.columns);
+const cutColumn = ([name, ...points]: ColumnData, min: number, max: number) => {
+    const slicedPoints = ArrayUtils.sliceByPercent(points, min, max);
+    return [name, ...slicedPoints] as ColumnData;
+};
 
-    const extremums = calcExtremums(chartData.columns, chartData.types);
+const transformDataToRender = (
+    chartData: ChartData,
+    options: { xMinPercent?: number; xMaxPercent?: number } = {},
+) => {
+    let chartDataCutted = chartData;
+    if (options.xMinPercent != null || options.xMaxPercent != null) {
+        chartDataCutted = {
+            ...chartData,
+            columns: chartData.columns.map(col =>
+                cutColumn(col, options.xMinPercent, options.xMaxPercent),
+            ),
+        };
+    }
+
+    const pointsByKey = mapPointsByKeys(chartDataCutted.columns);
+
+    const extremums = calcExtremums(
+        chartDataCutted.columns,
+        chartDataCutted.types,
+    );
 
     const pointsByKeyPercentised = percentisePointsByKey(
         pointsByKey,
-        chartData.types,
+        chartDataCutted.types,
         extremums,
     );
 
-    const keys = Object.keys(chartData.types);
+    const keys = Object.keys(chartDataCutted.types);
 
     const xKey = keys
-        .map(key => [key, chartData.types[key]])
+        .map(key => [key, chartDataCutted.types[key]])
         .find(([key, value]) => value === 'x')[0];
 
     const yKeys = keys.filter(key => key !== xKey);
@@ -105,8 +127,8 @@ const transformDataToRender = (chartData: ChartData) => {
         return {
             pointsPercentised: pointsByKeyPercentised[key],
             pointsOriginal: pointsByKey[key],
-            name: chartData.names[key],
-            color: chartData.colors[key],
+            name: chartDataCutted.names[key],
+            color: chartDataCutted.colors[key],
         };
     };
 

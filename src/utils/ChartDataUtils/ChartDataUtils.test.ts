@@ -181,6 +181,48 @@ describe('ChartDataUtils.transformDataToRender', () => {
             },
         });
     });
+
+    it('cut values with xMinPercent xMaxPercent', () => {
+        const mock: ChartDataTypes.ChartData = {
+            columns: [['x', 1, 2, 3, 4], ['y1', 5, 10, 1, 15]],
+            types: {
+                y1: 'line',
+                x: 'x',
+            },
+            names: {
+                y1: '#1',
+            },
+            colors: {
+                y1: '#F34C44',
+            },
+        };
+        const result = ChartDataUtils.transformDataToRender(mock, {
+            xMinPercent: 25,
+            xMaxPercent: 75,
+        });
+        expect(result).toEqual({
+            xColumn: {
+                color: undefined,
+                name: undefined,
+                pointsOriginal: [2, 3],
+                pointsPercentised: [0, 100],
+            },
+            yColumns: [
+                {
+                    color: '#F34C44',
+                    name: '#1',
+                    pointsOriginal: [10, 1],
+                    pointsPercentised: [0, 100],
+                },
+            ],
+            extremums: {
+                xMax: 3,
+                xMin: 2,
+                yMax: 10,
+                yMin: 1,
+            },
+        });
+    });
 });
 
 describe('ChartDataUtils.unpercentise', () => {
