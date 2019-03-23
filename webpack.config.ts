@@ -10,7 +10,7 @@ const config: webpack.Configuration = {
         main: './src/index.ts',
     },
     output: {
-        path: path.resolve(__dirname, './dist'),
+        path: path.resolve(__dirname, './docs'),
         filename: '[name].js',
     },
     module: {
