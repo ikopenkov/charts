@@ -4,10 +4,10 @@ import { StyleUtils } from 'src/utils/StyleUtils';
 import { ChartData } from 'src/utils/ChartDataUtils/ChartData.types';
 import chartDataUrl from 'src/assets/chartData.json';
 
-const loadChartData = async () => {
-    return (await fetch((chartDataUrl as any) as string).then(data =>
-        data.json(),
-    )) as ChartData[];
+const loadChartData = () => {
+    return fetch((chartDataUrl as any) as string).then(
+        (data: any) => data.json() as ChartData[],
+    );
 };
 
 loadChartData().then(chartData => {

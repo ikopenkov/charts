@@ -18,7 +18,7 @@ const config: webpack.Configuration = {
             {
                 test: /\.ts/,
                 exclude: /node_modules/,
-                use: 'ts-loader',
+                use: 'babel-loader',
             },
             {
                 test: /\.json$/,
