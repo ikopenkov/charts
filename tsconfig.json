@@ -8,6 +8,7 @@
         "resolveJsonModule": true,
         "paths": {
             "src/*": ["src/*"]
-        }
+        },
+        "typeRoots": ["node_modules/@types", "custom_typings"]
     }
 }
