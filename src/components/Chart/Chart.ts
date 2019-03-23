@@ -87,6 +87,7 @@ const renderDom = (container: HTMLElement, mode: ColorMode) => {
         padding: '20px 0',
         position: 'relative',
         display: 'flex',
+        flexWrap: 'wrap',
     });
 
     container.appendChild(mainContainer);
@@ -176,7 +177,7 @@ const handleCheckedIndexesChange = (
     render({ ...params, mode: self.mode });
 };
 
-const reRender = (params: Params) => {
+const reRender = (params: Required<Params>) => {
     const { self, mode } = params;
     const {
         svg,
