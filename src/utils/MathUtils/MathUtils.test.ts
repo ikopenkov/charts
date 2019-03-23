@@ -266,3 +266,26 @@ describe('divideToEqualParts', () => {
         ].forEach(checkIsCorrect);
     });
 });
+
+describe('getIsNumBeauty', () => {
+    it('works', () => {
+        expect(MathUtils.getIsNumBeauty(1000)).toBeTruthy();
+        expect(MathUtils.getIsNumBeauty(1200)).toBeTruthy();
+        expect(MathUtils.getIsNumBeauty(999000)).toBeTruthy();
+
+        expect(MathUtils.getIsNumBeauty(1230)).toBeFalsy();
+        expect(MathUtils.getIsNumBeauty(1234)).toBeFalsy();
+    });
+});
+
+describe('getLowerBeautyValue', () => {
+    it('works', () => {
+        expect(MathUtils.getLowerBeautyValue(1000, 900)).toEqual(1000);
+        expect(MathUtils.getLowerBeautyValue(1324, 1324)).toEqual(1324);
+        expect(MathUtils.getLowerBeautyValue(1324, 1301)).toEqual(1320);
+        expect(MathUtils.getLowerBeautyValue(1324, 1200)).toEqual(1300);
+        expect(MathUtils.getLowerBeautyValue(983573, 976932)).toEqual(983000);
+        expect(MathUtils.getLowerBeautyValue(3, -10)).toEqual(0);
+        expect(MathUtils.getLowerBeautyValue(231, -9)).toEqual(0);
+    });
+});

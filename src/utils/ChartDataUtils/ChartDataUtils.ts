@@ -1,6 +1,7 @@
 import { StringKeyMap } from 'src/utils/Types';
 import { ObjectUtils } from 'src/utils/ObjectUtils';
 import { ArrayUtils } from 'src/utils/ArrayUtils/ArrayUtils';
+import { MathUtils } from 'src/utils/MathUtils/MathUtils';
 import {
     ChartData,
     ChartRenderData,
@@ -67,13 +68,24 @@ const percentisePointsByKey = (
     }, pointsByKey);
 };
 
-const calcExtremums = (columns: ColumnData[], types: ColumnTypes) => {
+const calcExtremums = (
+    columns: ColumnData[],
+    types: ColumnTypes,
+    possibleYMinDecreasingPercent: number = 0,
+) => {
     const pointsByType = mapPointsByType(columns, types);
 
     const xMin = Math.min(...pointsByType.x);
     const xMax = Math.max(...pointsByType.x);
-    const yMin = Math.min(...pointsByType.line);
+    let yMin = Math.min(...pointsByType.line);
     const yMax = Math.max(...pointsByType.line);
+
+    if (possibleYMinDecreasingPercent) {
+        const range = yMax - yMin;
+        const possibleMin =
+            yMin - (range / 100) * possibleYMinDecreasingPercent;
+        yMin = MathUtils.getLowerBeautyValue(yMin, possibleMin);
+    }
 
     return {
         xMin,
@@ -94,6 +106,7 @@ const transformDataToRender = (
         xMinPercent?: number;
         xMaxPercent?: number;
         includingYIndexes?: number[];
+        possibleYMinDecreasingPercent?: number;
     } = {},
 ) => {
     let chartDataCutted = { ...chartData };
@@ -150,6 +163,7 @@ const transformDataToRender = (
     const extremums = calcExtremums(
         chartDataCutted.columns,
         chartDataCutted.types,
+        options.possibleYMinDecreasingPercent,
     );
 
     const pointsByKeyPercentised = percentisePointsByKey(

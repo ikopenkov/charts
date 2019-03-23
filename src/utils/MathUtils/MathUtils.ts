@@ -123,6 +123,40 @@ const divideToRoundParts = ({ max, min = 0, parts }: DividerParams) => {
     return result;
 };
 
+const getIsNumBeauty = (num: number) => {
+    let lastZeroes = '';
+    let numRest = String(num);
+    while (numRest && numRest[numRest.length - 1] === '0') {
+        lastZeroes += '0';
+        numRest = numRest.slice(0, numRest.length - 1);
+    }
+    return lastZeroes.length >= numRest.length;
+};
+
+const getLowerBeautyValue = (value: number, minValue: number) => {
+    if (minValue <= 0) {
+        return 0;
+    }
+
+    let currentValue = String(value);
+    let prevValue = String(value);
+    let zeroesAdded = 0;
+    while (+currentValue >= minValue) {
+        if (getIsNumBeauty(+currentValue)) {
+            return +currentValue;
+        }
+
+        prevValue = currentValue;
+
+        zeroesAdded++;
+        currentValue =
+            currentValue.slice(0, currentValue.length - zeroesAdded) +
+            String(10 ** zeroesAdded).slice(1, Infinity);
+    }
+
+    return +prevValue;
+};
+
 const divideToEqualParts = ({
     number,
     minPart,
@@ -185,4 +219,6 @@ export const MathUtils = {
     getNearestPoint,
     divideToRoundParts,
     divideToEqualParts,
+    getIsNumBeauty,
+    getLowerBeautyValue,
 };

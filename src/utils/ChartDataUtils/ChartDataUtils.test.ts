@@ -76,6 +76,20 @@ describe('ChartDataUtils.calcExtremums', () => {
             yMin: 3,
         });
     });
+
+    it('decrease y min to lower round value', () => {
+        const result = ChartDataUtils.calcExtremums(
+            ChartDataMock.columns,
+            ChartDataMock.types,
+            300,
+        );
+        expect(result).toEqual({
+            xMax: 3,
+            xMin: 1,
+            yMax: 5,
+            yMin: 0,
+        });
+    });
 });
 
 describe('ChartDataUtils.percentisePointsByKey', () => {

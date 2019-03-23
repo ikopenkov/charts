@@ -115,6 +115,7 @@ const updateRangerEl = ({
         borderTop: borderTopStyle,
         borderBottom: borderTopStyle,
         cursor: 'grab',
+        touchAction: 'none',
     });
 };
 

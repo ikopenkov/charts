@@ -22,15 +22,15 @@ import {
     ColSwitchInstance,
 } from 'src/components/ColSwitch/ColSwitch';
 
+const possibleYMinDecreasingPercent = 20;
+
 type InitialDataType = {
     rangeXMinPercent: number;
     rangeXMaxPercent: number;
-    mode: ColorMode;
 };
 const InitialData: InitialDataType = {
     rangeXMinPercent: 70,
     rangeXMaxPercent: 100,
-    mode: 'night',
 };
 
 const renderDom = (container: HTMLElement, mode: ColorMode) => {
@@ -51,7 +51,7 @@ const renderDom = (container: HTMLElement, mode: ColorMode) => {
         fontWeight: 'bold',
         color: colors.text,
     });
-    headerContainer.innerText = 'Some Header';
+    headerContainer.innerText = '(No header)';
 
     const svgContainer = document.createElement('div');
     DomUtils.setElementStyle(svgContainer, {
@@ -198,6 +198,7 @@ const reRender = (params: Params) => {
         xMinPercent: self.xMinPercent,
         xMaxPercent: self.xMaxPercent,
         includingYIndexes: self.checkedIndexes,
+        possibleYMinDecreasingPercent,
     });
 
     self.chartData = chartData;
@@ -296,6 +297,7 @@ const render = (params: Params) => {
         const chartData = ChartDataUtils.transformDataToRender(data, {
             xMinPercent: InitialData.rangeXMinPercent,
             xMaxPercent: InitialData.rangeXMaxPercent,
+            possibleYMinDecreasingPercent,
         });
 
         const grid = Grid.render({

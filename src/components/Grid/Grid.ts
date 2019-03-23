@@ -61,9 +61,13 @@ const renderYScales = (
     { mode, svg, chartData, aspectRatio }: RenderParams,
     selfs: YScaleInstance[] = [],
 ) => {
+    const minPartHeight = 60;
+    const height = svg.clientHeight;
+    const parts = Math.floor(height / minPartHeight);
     const yMarkers = MathUtils.divideToRoundParts({
         max: chartData.extremums.yMax,
-        parts: 5,
+        min: chartData.extremums.yMin,
+        parts,
     });
 
     const yMarkersPercentised = ChartDataUtils.percentisePoints({
