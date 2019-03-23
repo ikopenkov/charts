@@ -7,7 +7,6 @@ const checkMarkHtml = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height
 type Instance = {
     root: HTMLElement;
     checkbox: HTMLElement;
-    // checkboxMark: HTMLElement;
     text: HTMLElement;
 };
 
@@ -41,16 +40,12 @@ const render = ({
 
         checkbox.innerHTML = checkMarkHtml;
 
-        // const checkboxMark = document.createElement('div');
-        // root.appendChild(checkboxMark);
-
         const textEl = document.createElement('div');
         root.appendChild(textEl);
 
         instance = {
             root,
             checkbox,
-            // checkboxMark,
             text: textEl,
         };
     }
@@ -79,6 +74,11 @@ const render = ({
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: '12px',
+    });
+
+    const checkMark = instance.checkbox.children[0] as SVGElement;
+    DomUtils.setElementStyle(checkMark, {
+        opacity: isChecked ? '1' : '0',
     });
 
     DomUtils.setElementStyle(instance.text, {

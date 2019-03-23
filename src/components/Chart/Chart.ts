@@ -16,7 +16,7 @@ import {
     RangeSelector,
     RangeSelectorInstance,
 } from 'src/components/RangeSelector/RangeSelector';
-import { ColorMode } from 'src/utils/StyleUtils';
+import { ColorMode, StyleUtils } from 'src/utils/StyleUtils';
 import {
     ColSwitch,
     ColSwitchInstance,
@@ -30,10 +30,11 @@ type InitialDataType = {
 const InitialData: InitialDataType = {
     rangeXMinPercent: 70,
     rangeXMaxPercent: 100,
-    mode: 'day',
+    mode: 'night',
 };
 
-const renderDom = (container: HTMLElement) => {
+const renderDom = (container: HTMLElement, mode: ColorMode) => {
+    const colors = StyleUtils.getColors({ mode });
     const mainContainer = document.createElement('div');
     DomUtils.setElementStyle(mainContainer, {
         height: '100%',
@@ -48,6 +49,7 @@ const renderDom = (container: HTMLElement) => {
         fontSize: '16px',
         lineHeight: '1.2',
         fontWeight: 'bold',
+        color: colors.text,
     });
     headerContainer.innerText = 'Some Header';
 
@@ -147,7 +149,7 @@ const handleResize = (params: Required<Params>) => {
     self.aspectRatio = DomUtils.getAspectRatio(svg);
 
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    render(params);
+    render({ ...params, mode: self.mode });
 };
 
 const handleRangeSelectionChange = (
@@ -161,7 +163,7 @@ const handleRangeSelectionChange = (
     self.xMaxPercent = xMaxPercent;
 
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    render(params);
+    render({ ...params, mode: self.mode });
 };
 
 const handleCheckedIndexesChange = (
@@ -171,11 +173,11 @@ const handleCheckedIndexesChange = (
     const { self } = params;
     self.checkedIndexes = indexes;
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    render(params);
+    render({ ...params, mode: self.mode });
 };
 
 const reRender = (params: Params) => {
-    const { self } = params;
+    const { self, mode } = params;
     const {
         svg,
         grid,
@@ -183,7 +185,12 @@ const reRender = (params: Params) => {
         mousePointer,
         aspectRatio,
         rangeSelector,
+        colSwitch,
+        headerContainer,
     } = self;
+    const colors = StyleUtils.getColors({ mode });
+
+    DomUtils.setElementStyle(headerContainer, { color: colors.text });
 
     svg.setAttribute('viewBox', `0 0 ${100 * aspectRatio} 100`);
 
@@ -195,7 +202,7 @@ const reRender = (params: Params) => {
 
     self.chartData = chartData;
 
-    grid.reRender({ chartData, aspectRatio });
+    grid.reRender({ chartData, aspectRatio, mode });
 
     polyLines.forEach((polyLine, index) => {
         const yCol = chartData.yColumns[index];
@@ -215,9 +222,13 @@ const reRender = (params: Params) => {
         }
     });
 
-    mousePointer.reRender({ chartData, aspectRatio });
+    mousePointer.reRender({ chartData, aspectRatio, mode });
 
-    rangeSelector.reRender();
+    rangeSelector.reRender({
+        mode,
+    });
+
+    colSwitch.reRender({ mode });
 };
 
 type Instance = {
@@ -239,31 +250,18 @@ type Instance = {
     xMaxPercent: number;
     aspectRatio: number;
     colSwitch: ColSwitchInstance;
+    mode: ColorMode;
 };
 
 type Params = {
     container: HTMLElement;
     data: ChartData;
+    mode: ColorMode;
     self?: Instance;
 };
 
 const render = (params: Params) => {
     const { container, data, self } = params;
-    const sizesInPercent = {
-        lineThin: 0.3,
-        lineBold: 0.6,
-        pointerCircleRadius: 1.2,
-        text: 4,
-    };
-
-    const colors = {
-        ruler: '#DFE6EB',
-        horizontalScale: '#F2F4F5',
-        scaleText: '#96A2AA',
-        text: '#222222',
-        gridText: '#96A2AA',
-        background: '#fff',
-    };
 
     let instance = self;
     if (!instance) {
@@ -275,7 +273,7 @@ const render = (params: Params) => {
             rangeSelectorContainer,
             switchContainer,
             svg,
-        } = renderDom(container);
+        } = renderDom(container, params.mode);
 
         const chartDataUncut = ChartDataUtils.transformDataToRender(data);
         const checkedIndexes = chartDataUncut.yColumns.map((y, index) => index);
@@ -284,7 +282,7 @@ const render = (params: Params) => {
             onChage: (indexes: number[]) => {},
         };
         const colSwitch = ColSwitch.render({
-            mode: InitialData.mode,
+            mode: params.mode,
             container: switchContainer,
             chartData: chartDataUncut,
             onChange: indexes =>
@@ -303,12 +301,7 @@ const render = (params: Params) => {
         const grid = Grid.render({
             svg,
             aspectRatio,
-            style: {
-                textSizeInPercent: sizesInPercent.text,
-                lineColor: colors.horizontalScale,
-                lineWidthInPercent: sizesInPercent.lineThin,
-                textColor: colors.gridText,
-            },
+            mode: params.mode,
             container: xScaleContainer,
             chartData,
         });
@@ -334,7 +327,7 @@ const render = (params: Params) => {
             xPercent: currentPointerX,
             aspectRatio,
             chartData,
-            mode: InitialData.mode,
+            mode: params.mode,
             isVisible: false,
         });
 
@@ -348,7 +341,7 @@ const render = (params: Params) => {
                 rangeSelectorChangeHandlerWrapper.onChange(x1, x2),
             initialX1: InitialData.rangeXMinPercent,
             initialX2: InitialData.rangeXMaxPercent,
-            mode: InitialData.mode,
+            mode: params.mode,
         });
 
         instance = {
@@ -370,6 +363,7 @@ const render = (params: Params) => {
             xMinPercent: InitialData.rangeXMinPercent,
             xMaxPercent: InitialData.rangeXMaxPercent,
             aspectRatio,
+            mode: params.mode,
         };
 
         checkedIndexesChangeHandlerWrapper.onChage = (indexes: number[]) =>
@@ -400,6 +394,7 @@ const render = (params: Params) => {
             false,
         );
     } else {
+        instance.mode = params.mode;
         reRender(params);
     }
 

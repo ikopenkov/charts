@@ -20,9 +20,22 @@ const COLORS = {
     rangerBorder: 'rgba(201, 220, 232, 0.5)',
 };
 
+const COLORS_NIGHT = {
+    background: '#242F3D',
+    ruler: '#3C4A59',
+    horizontalScale: '#293543',
+    text: '#fff',
+    gridText: '#556777',
+    switchBorder: '#354657',
+    rangerOverlay: 'rgba(31, 42, 55, 0.75)',
+    rangerBorder: 'rgba(65, 86, 106, 0.5)',
+
+    scaleText: '#556777',
+};
+
 const COLORS_BY_MODE = {
     day: COLORS,
-    night: COLORS,
+    night: COLORS_NIGHT,
 };
 
 const TIMINGS_S = {

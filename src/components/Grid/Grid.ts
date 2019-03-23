@@ -1,22 +1,19 @@
 import { ChartRenderData } from 'src/utils/ChartDataUtils/ChartData.types';
 import { MathUtils } from 'src/utils/MathUtils/MathUtils';
-import {
-    YScale,
-    YScaleInstance,
-    YScaleStyle,
-} from 'src/components/Grid/_YScale';
+import { YScale, YScaleInstance } from 'src/components/Grid/_YScale';
 import { ComponentUtils } from 'src/utils/ComponentUtils';
 import { ChartDataUtils } from 'src/utils/ChartDataUtils/ChartDataUtils';
-import { XScaleStyle } from 'src/components/Grid/_XScale';
 import { DomUtils } from 'src/utils/DomUtils';
+import { ColorMode, StyleUtils } from 'src/utils/StyleUtils';
 
 const xContainerPaddingLeftPx = 5;
 
 const renderXScales = (
-    { chartData, svg, style }: RenderParams,
+    { chartData, mode, svg }: RenderParams,
     container: HTMLElement,
     selfs: HTMLElement[] = [],
 ) => {
+    const colors = StyleUtils.getColors({ mode });
     const { xColumn } = chartData;
 
     const widthPx = 70;
@@ -32,8 +29,6 @@ const renderXScales = (
         minPart: minPointsPerStep,
     });
 
-    const pointsInPercent = minPointsPerStep / widthPercent;
-
     const extraElements = selfs.slice(steps.length, Infinity);
     extraElements.forEach(el => el.parentElement.removeChild(el));
 
@@ -41,11 +36,6 @@ const renderXScales = (
         let self = selfs[index];
         if (!self) {
             self = document.createElement('div');
-        }
-
-        let xPercent = xIndex / pointsInPercent;
-        if (xPercent > 100) {
-            xPercent = 100;
         }
 
         const xOriginal = xColumn.pointsOriginal[xIndex];
@@ -58,7 +48,7 @@ const renderXScales = (
 
         DomUtils.setElementStyle(self, {
             fontSize: '10px',
-            color: style.textColor,
+            color: colors.gridText,
         });
 
         container.appendChild(self);
@@ -68,7 +58,7 @@ const renderXScales = (
 };
 
 const renderYScales = (
-    { style, svg, chartData, aspectRatio }: RenderParams,
+    { mode, svg, chartData, aspectRatio }: RenderParams,
     selfs: YScaleInstance[] = [],
 ) => {
     const yMarkers = MathUtils.divideToRoundParts({
@@ -93,7 +83,8 @@ const renderYScales = (
             aspectRatio,
             yOriginal,
             yPercentised: yMarkersPercentised[index],
-            style,
+            isZeroScale: index === 0,
+            mode,
         };
         if (!self) {
             self = YScale.render(params);
@@ -114,8 +105,8 @@ type RenderParams = {
     chartData: ChartRenderData;
     svg: SVGSVGElement;
     container: HTMLElement;
-    style: YScaleStyle & XScaleStyle;
     aspectRatio: number;
+    mode: ColorMode;
     self?: Instance;
 };
 const render = (params: RenderParams) => {

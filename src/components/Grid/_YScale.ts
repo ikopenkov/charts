@@ -1,24 +1,19 @@
 import { ComponentUtils } from 'src/utils/ComponentUtils';
 import { DomUtils } from 'src/utils/DomUtils';
+import { ColorMode, StyleUtils } from 'src/utils/StyleUtils';
 
 type Self = {
     line: SVGLineElement;
     text: HTMLElement;
 };
 
-export type YScaleStyle = {
-    textColor: string;
-    lineColor: string;
-    lineWidthInPercent: number;
-    textSizeInPercent: number;
-};
-
 type RenderParams = {
     yOriginal: number;
     yPercentised: number;
     svg: SVGSVGElement;
-    style: YScaleStyle;
     aspectRatio: number;
+    mode: ColorMode;
+    isZeroScale: boolean;
     self?: Self;
 };
 
@@ -27,7 +22,8 @@ const render = ({
     aspectRatio,
     yOriginal,
     yPercentised,
-    style: { lineColor, textColor, lineWidthInPercent, textSizeInPercent },
+    mode,
+    isZeroScale,
     self,
 }: RenderParams) => {
     let instance = self;
@@ -52,33 +48,34 @@ const render = ({
         yPercentised = 100;
     }
 
+    const sizes = StyleUtils.getSizesInPercents(svg.clientWidth, aspectRatio);
+    const colors = StyleUtils.getColors({ mode });
+
+    const lineColor = isZeroScale ? colors.ruler : colors.horizontalScale;
+
     instance.line.setAttribute('x1', '0');
     instance.line.setAttribute('y1', String(yPercentised));
     instance.line.setAttribute('x2', String(100 * aspectRatio));
     instance.line.setAttribute('y2', String(yPercentised));
     instance.line.setAttribute(
         'style',
-        `stroke:${lineColor};stroke-width:${lineWidthInPercent}`,
+        `stroke:${lineColor};stroke-width:${sizes.lineThin}`,
     );
 
-    const textPadding = String(textSizeInPercent / 4);
+    const textPaddingPx = 5;
+    const pxInPercent = svg.clientWidth / (100 * aspectRatio);
+    const textPadding = textPaddingPx / pxInPercent;
 
     DomUtils.setElementStyle(instance.text, {
         position: 'absolute',
         bottom: `${100 - yPercentised + +textPadding}%`,
-        left: `${textPadding}%`,
-        fontSize: '10px',
-        color: textColor,
+        left: '0',
+        fontSize: `${StyleUtils.SIZES_PX.scaleText}px`,
+        color: colors.gridText,
         pointerEvents: 'none',
     });
 
     instance.text.innerText = String(yOriginal);
-
-    // instance.text.setAttribute('x', textPadding);
-    // instance.text.setAttribute('y', String(yPercentised - +textPadding));
-    // instance.text.setAttribute('font-size', String(textSizeInPercent));
-    // instance.text.setAttribute('fill', String(textColor));
-    // instance.text.textContent = String(yOriginal);
 
     return instance;
 };

@@ -86,12 +86,6 @@ const handleGrabEnd = (renderParams: Required<RenderParams>) => {
     const { self } = renderParams;
     self.x1Initial = self.x1;
     self.x2Initial = self.x2;
-
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    render({
-        ...renderParams,
-        self,
-    });
 };
 
 type MainPartParams = {

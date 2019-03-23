@@ -70,6 +70,7 @@ const updateElements = (params: RenderParams) => {
             boxShadow: '0px 0px 3px 1px rgba(0, 0, 0, 0.1)',
             borderRadius: '5px',
             top: '0',
+            color: colors.text,
         });
 
         self.headerEl.innerText = header;
@@ -113,6 +114,7 @@ const render = (params: RenderParams) => {
             minWidth: '80px',
             fontSize: '13px',
             boxSizing: 'border-box',
+            pointerEvents: 'none',
         });
         container.appendChild(rootEl);
 

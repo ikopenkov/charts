@@ -17,8 +17,10 @@ const handleClick = (index: number, params: RenderParams) => {
         self.checkedIndexes.push(index);
     }
 
+    const params2 = { ...params, mode: self.mode };
+
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    render(params);
+    render(params2);
 
     params.onChange(self.checkedIndexes);
 };
@@ -26,6 +28,7 @@ const handleClick = (index: number, params: RenderParams) => {
 type Instance = {
     buttons: SwitchButtonInstance[];
     checkedIndexes: number[];
+    mode: ColorMode;
 };
 
 type RenderParams = {
@@ -57,11 +60,13 @@ const render = (renderParams: RenderParams) => {
         instance = {
             buttons,
             checkedIndexes,
+            mode,
         };
 
         clickHandlerWrapper.handleClick = (index: number) =>
             handleClick(index, { ...renderParams, self: instance });
     } else {
+        instance.mode = mode;
         instance.buttons.forEach((button, index) =>
             button.reRender({
                 isChecked: instance.checkedIndexes.includes(index),
