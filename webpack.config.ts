@@ -2,16 +2,14 @@
 import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import path from 'path';
-// import CleanWebpackPlugin from 'clean-webpack-plugin';
 
 const config: webpack.Configuration = {
-    mode: 'development',
     entry: {
         main: './src/index.ts',
     },
     output: {
         path: path.resolve(__dirname, './docs'),
-        filename: '[name].js',
+        filename: '[name].[hash].js',
     },
     module: {
         rules: [
@@ -38,22 +36,11 @@ const config: webpack.Configuration = {
             src: `${__dirname}/src`,
         },
     },
-    devtool: 'source-map',
     plugins: [
-        // new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
             template: './src/index.html',
         }),
-        new webpack.HotModuleReplacementPlugin(),
     ],
-    devServer: {
-        // contentBase: path.join(__dirname, 'dist'),
-        compress: true,
-        port: 9000,
-        hot: true,
-        // open: true,
-        historyApiFallback: true,
-    },
 };
 
 export default config;

@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "start": "webpack-dev-server",
+        "start": "webpack-dev-server --config=webpack.config.dev.ts",
         "build": "webpack --progress --config=webpack.config.prod.ts",
         "test": "jest --forceExit --coverage --verbose",
         "test:watch": "npm run test -- --watchAll",

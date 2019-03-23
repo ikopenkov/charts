@@ -58,7 +58,7 @@ module.exports = {
 
     overrides: [
         {
-            files: ['webpack.config.ts', 'webpack.config.prod.ts'],
+            files: ['webpack.config.ts', 'webpack.config.dev.ts', 'webpack.config.prod.ts'],
             rules: {
                 'import/no-extraneous-dependencies': 'off',
                 'import/no-default-export': 'off',
