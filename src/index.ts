@@ -19,7 +19,7 @@ loadChartData().then(chartData => {
         const container = document.createElement('div');
         DomUtils.setElementStyle(container, {
             width: '100%',
-            height: 'calc(100vh - 64px)',
+            height: 'calc(100vh - 40px)',
             boxSizing: 'border-box',
             padding: '0 15px',
         });
