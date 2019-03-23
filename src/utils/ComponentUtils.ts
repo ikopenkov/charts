@@ -21,12 +21,16 @@ const create = <I, RP extends { self?: I }>(
                         }
                         return value;
                     }, renderParams);
-                    fullParams.self = self;
 
                     // eslint-disable-next-line no-param-reassign
-                    renderParams = fullParams;
+                    renderParams = {
+                        self,
+                        ...partialParams,
+                        ...renderParams,
+                        ...fullParams,
+                    };
 
-                    render(fullParams);
+                    render(renderParams);
                 },
 
                 remove: () => remove(self),

@@ -5,6 +5,7 @@ const SIZES_PX = {
     lineBold: 3,
     pointerCircleRadius: 5,
     scaleText: 10,
+    switchText: 13,
 };
 
 const COLORS = {
@@ -14,6 +15,7 @@ const COLORS = {
     text: '#222222',
     gridText: '#96A2AA',
     background: '#fff',
+    switchBorder: '#E6ECF0',
     rangerOverlay: 'rgba(242, 247, 249, 0.75)',
     rangerBorder: 'rgba(201, 220, 232, 0.5)',
 };
@@ -21,6 +23,11 @@ const COLORS = {
 const COLORS_BY_MODE = {
     day: COLORS,
     night: COLORS,
+};
+
+const TIMINGS_S = {
+    common: 0.5,
+    fast: 0.1,
 };
 
 export type ColorMode = 'day' | 'night';
@@ -37,6 +44,7 @@ const getSizesInPercents = (width: number, aspectRatio: number = 1) => {
 
 export const StyleUtils = {
     SIZES_PX,
+    TIMINGS_S,
     getSizesInPercents,
     getColors,
 };

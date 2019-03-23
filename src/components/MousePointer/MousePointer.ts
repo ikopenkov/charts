@@ -100,15 +100,20 @@ const render = ({
             caption,
         };
     } else {
-        chartData.yColumns.forEach((yColumn, index) => {
-            const circle = instance.circles[index];
-            circle.reRender({
-                x: xPoint,
-                aspectRatio,
-                y: yValuesPercentised[index],
-                isVisible,
-                mode,
-            });
+        instance.circles.forEach((circle, index) => {
+            const col = chartData.yColumns[index];
+            if (col) {
+                circle.reRender({
+                    x: xPoint,
+                    aspectRatio,
+                    y: yValuesPercentised[index],
+                    isVisible,
+                    mode,
+                    color: col.color,
+                });
+            } else {
+                circle.reRender({ isVisible: false });
+            }
         });
         instance.ruler.reRender({
             aspectRatio,

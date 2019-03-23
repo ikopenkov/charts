@@ -1,5 +1,6 @@
 import { ComponentUtils } from 'src/utils/ComponentUtils';
 import { StyleUtils } from 'src/utils/StyleUtils';
+import { DomUtils } from 'src/utils/DomUtils';
 
 const calcPathData = (
     xPointsInPercents: number[],
@@ -22,6 +23,7 @@ type RenderParams = {
     svg: SVGSVGElement;
     aspectRatio: number;
     isThin?: boolean;
+    isHidden?: boolean;
     self?: SVGPathElement;
 };
 
@@ -33,6 +35,7 @@ const render = ({
     aspectRatio,
     isThin = false,
     self,
+    isHidden,
 }: RenderParams) => {
     const pathData = calcPathData(
         xPointsInPercents,
@@ -43,6 +46,9 @@ const render = ({
     let path = self;
     if (!path) {
         path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        DomUtils.setElementStyle(path, {
+            transition: `${StyleUtils.TIMINGS_S.common}s`,
+        });
         svg.appendChild(path);
     }
 
@@ -58,6 +64,12 @@ const render = ({
     path.setAttribute('stroke-width', String(strokeWidth));
     path.setAttribute('fill', 'none');
     path.setAttribute('d', pathData);
+
+    if (isHidden) {
+        DomUtils.setElementStyle(path, { opacity: '0' });
+    } else {
+        DomUtils.setElementStyle(path, { opacity: '1' });
+    }
 
     return path;
 };

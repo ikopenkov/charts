@@ -90,9 +90,14 @@ const cutColumn = ([name, ...points]: ColumnData, min: number, max: number) => {
 
 const transformDataToRender = (
     chartData: ChartData,
-    options: { xMinPercent?: number; xMaxPercent?: number } = {},
+    options: {
+        xMinPercent?: number;
+        xMaxPercent?: number;
+        includingYIndexes?: number[];
+    } = {},
 ) => {
-    let chartDataCutted = chartData;
+    let chartDataCutted = { ...chartData };
+
     if (options.xMinPercent != null || options.xMaxPercent != null) {
         chartDataCutted = {
             ...chartData,
@@ -100,6 +105,44 @@ const transformDataToRender = (
                 cutColumn(col, options.xMinPercent, options.xMaxPercent),
             ),
         };
+    }
+
+    if (options.includingYIndexes) {
+        const xKey = Object.keys(chartDataCutted.types).find(key => {
+            const value = chartDataCutted.types[key];
+            return value === 'x';
+        });
+        const yColumns = chartDataCutted.columns.filter(
+            ([key]) => key !== xKey,
+        );
+        const yColumnsFiltered = yColumns.filter((_, index) =>
+            options.includingYIndexes.includes(index),
+        );
+        const xColumn = chartDataCutted.columns.find(([key]) => key === xKey);
+
+        chartDataCutted = {
+            ...chartDataCutted,
+            columns: [xColumn, ...yColumnsFiltered],
+            names: {
+                ...chartDataCutted.names,
+            },
+            types: {
+                ...chartDataCutted.types,
+            },
+            colors: {
+                ...chartDataCutted.colors,
+            },
+        };
+
+        const ids = yColumns.map(([id]) => id);
+        const includingIds = yColumnsFiltered.map(([id]) => id);
+        const excludingIds = ids.filter(id => !includingIds.includes(id));
+
+        excludingIds.forEach(id => {
+            delete chartDataCutted.names[id];
+            delete chartDataCutted.types[id];
+            delete chartDataCutted.colors[id];
+        });
     }
 
     const pointsByKey = mapPointsByKeys(chartDataCutted.columns);

@@ -6,6 +6,84 @@ import { ColorMode, StyleUtils } from 'src/utils/StyleUtils';
 const renderDescriptionHtml = (value: number, name: string) =>
     `<div style="font-weight: bold;">${value}</div><div style="margin-top: 2px; font-size: 10px">${name}</div>`;
 
+const updateDescriptionEl = (
+    el: HTMLElement,
+    index: number,
+    chartData: ChartRenderData,
+    yValuesOriginal: number[],
+) => {
+    const yCol = chartData.yColumns[index];
+    if (yCol) {
+        DomUtils.setElementStyle(
+            el,
+            {
+                color: yCol.color,
+                paddingLeft: index === 0 ? '0' : '5px',
+            },
+            { replaceWholeStyleObject: true },
+        );
+        // eslint-disable-next-line no-param-reassign
+        el.innerHTML = renderDescriptionHtml(yValuesOriginal[index], yCol.name);
+    } else {
+        DomUtils.setElementStyle(el, {
+            display: 'none',
+        });
+    }
+};
+
+const updateElements = (params: RenderParams) => {
+    const {
+        self,
+        isVisible,
+        container,
+        x,
+        aspectRatio,
+        mode,
+        chartData,
+        yValuesOriginal,
+        header,
+    } = params;
+    if (isVisible) {
+        const width = self.rootEl.offsetWidth;
+        const containerWidth = container.offsetWidth;
+        const halfWidth = width / 2;
+        const pixelsInPercent = containerWidth / (100 * aspectRatio);
+        const xProportionated = x * aspectRatio;
+        const xPx = xProportionated * pixelsInPercent;
+
+        const leftSideX = xPx - halfWidth;
+
+        let missingLeft = 0;
+        if (leftSideX < 0) {
+            missingLeft = leftSideX;
+        }
+        const rightSideX = leftSideX + width;
+        const needStickToRight = rightSideX > containerWidth;
+
+        const colors = StyleUtils.getColors({ mode });
+        DomUtils.setElementStyle(self.rootEl, {
+            padding: '5px 10px',
+            position: 'absolute',
+            right: needStickToRight ? '0' : 'auto',
+            left: needStickToRight ? 'auto' : `${leftSideX - missingLeft}px`,
+            backgroundColor: colors.background,
+            boxShadow: '0px 0px 3px 1px rgba(0, 0, 0, 0.1)',
+            borderRadius: '5px',
+            top: '0',
+        });
+
+        self.headerEl.innerText = header;
+
+        self.descriptionEls.forEach((el, index) =>
+            updateDescriptionEl(el, index, chartData, yValuesOriginal),
+        );
+
+        DomUtils.setElementStyle(self.rootEl, { display: '' });
+    } else {
+        DomUtils.setElementStyle(self.rootEl, { display: 'none' });
+    }
+};
+
 type Self = {
     rootEl: HTMLElement;
     headerEl: HTMLElement;
@@ -25,18 +103,10 @@ type RenderParams = {
     self?: Self;
 };
 
-const render = ({
-    container,
-    chartData,
-    mode,
-    x,
-    aspectRatio,
-    header,
-    yValuesOriginal,
-    isVisible,
-    self,
-}: RenderParams) => {
-    let instance = self;
+const render = (params: RenderParams) => {
+    const { container, chartData } = params;
+
+    let instance = params.self;
     if (!instance) {
         const rootEl = document.createElement('div');
         DomUtils.setElementStyle(rootEl, {
@@ -76,58 +146,10 @@ const render = ({
         };
     }
 
-    if (isVisible) {
-        const width = instance.rootEl.offsetWidth;
-        const containerWidth = container.offsetWidth;
-        const halfWidth = width / 2;
-        const pixelsInPercent = containerWidth / (100 * aspectRatio);
-        const xProportionated = x * aspectRatio;
-        const xPx = xProportionated * pixelsInPercent;
-
-        const leftSideX = xPx - halfWidth;
-
-        let missingLeft = 0;
-        if (leftSideX < 0) {
-            missingLeft = leftSideX;
-        }
-        const rightSideX = leftSideX + width;
-        const needStickToRight = rightSideX > containerWidth;
-
-        const colors = StyleUtils.getColors({ mode });
-        DomUtils.setElementStyle(instance.rootEl, {
-            padding: '5px 10px',
-            position: 'absolute',
-            right: needStickToRight ? '0' : 'auto',
-            left: needStickToRight ? 'auto' : `${leftSideX - missingLeft}px`,
-            backgroundColor: colors.background,
-            boxShadow: '0px 0px 3px 1px rgba(0, 0, 0, 0.1)',
-            borderRadius: '5px',
-            top: '0',
-        });
-
-        instance.headerEl.innerText = header;
-
-        instance.descriptionEls.forEach((el, index) => {
-            const yCol = chartData.yColumns[index];
-            DomUtils.setElementStyle(
-                el,
-                {
-                    color: yCol.color,
-                    paddingLeft: index === 0 ? '0' : '5px',
-                },
-                { replaceWholeStyleObject: true },
-            );
-            // eslint-disable-next-line no-param-reassign
-            el.innerHTML = renderDescriptionHtml(
-                yValuesOriginal[index],
-                yCol.name,
-            );
-        });
-
-        DomUtils.setElementStyle(instance.rootEl, { display: '' });
-    } else {
-        DomUtils.setElementStyle(instance.rootEl, { display: 'none' });
-    }
+    updateElements({
+        ...params,
+        self: instance,
+    });
 
     return instance;
 };

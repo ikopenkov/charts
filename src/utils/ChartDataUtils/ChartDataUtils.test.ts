@@ -223,6 +223,65 @@ describe('ChartDataUtils.transformDataToRender', () => {
             },
         });
     });
+
+    it('cuts not including yIndexes', () => {
+        const mock: ChartDataTypes.ChartData = {
+            columns: [
+                ['x', 1, 2, 3, 4],
+                ['y1', 5, 10, 1, 15],
+                ['y2', -2, 19, 2, 3],
+            ],
+            types: {
+                y1: 'line',
+                y2: 'line',
+                x: 'x',
+            },
+            names: {
+                y1: '#1',
+                y2: '#2',
+            },
+            colors: {
+                y1: '#F34C44',
+                y2: '#F34C44',
+            },
+        };
+        const includingYIndexes = [0];
+        const result = ChartDataUtils.transformDataToRender(mock, {
+            includingYIndexes,
+        });
+        expect(result).toEqual({
+            xColumn: {
+                color: undefined,
+                name: undefined,
+                pointsOriginal: [1, 2, 3, 4],
+                pointsPercentised: [
+                    0,
+                    33.333333333333336,
+                    66.66666666666667,
+                    100,
+                ],
+            },
+            yColumns: [
+                {
+                    color: '#F34C44',
+                    name: '#1',
+                    pointsOriginal: [5, 10, 1, 15],
+                    pointsPercentised: [
+                        71.42857142857143,
+                        35.71428571428571,
+                        100,
+                        0,
+                    ],
+                },
+            ],
+            extremums: {
+                xMax: 4,
+                xMin: 1,
+                yMax: 15,
+                yMin: 1,
+            },
+        });
+    });
 });
 
 describe('ChartDataUtils.unpercentise', () => {

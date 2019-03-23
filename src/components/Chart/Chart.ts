@@ -17,6 +17,10 @@ import {
     RangeSelectorInstance,
 } from 'src/components/RangeSelector/RangeSelector';
 import { ColorMode } from 'src/utils/StyleUtils';
+import {
+    ColSwitch,
+    ColSwitchInstance,
+} from 'src/components/ColSwitch/ColSwitch';
 
 type InitialDataType = {
     rangeXMinPercent: number;
@@ -52,12 +56,12 @@ const renderDom = (container: HTMLElement) => {
         flex: '1 1 auto',
         position: 'relative',
         display: 'flex',
-        flexDirection: 'column',
     });
 
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     DomUtils.setElementStyle(svg, {
-        flex: '1 1 auto',
+        width: '100%',
+        height: '100%',
     });
 
     const xScaleContainer = document.createElement('div');
@@ -75,11 +79,20 @@ const renderDom = (container: HTMLElement) => {
         flexDirection: 'column',
     });
 
+    const switchContainer = document.createElement('div');
+    DomUtils.setElementStyle(switchContainer, {
+        flex: '0 0 auto',
+        padding: '20px 0',
+        position: 'relative',
+        display: 'flex',
+    });
+
     container.appendChild(mainContainer);
     mainContainer.appendChild(headerContainer);
     mainContainer.appendChild(svgContainer);
     mainContainer.appendChild(xScaleContainer);
     mainContainer.appendChild(rangeSelectorContainer);
+    mainContainer.appendChild(switchContainer);
     svgContainer.appendChild(svg);
 
     return {
@@ -88,6 +101,7 @@ const renderDom = (container: HTMLElement) => {
         headerContainer,
         xScaleContainer,
         rangeSelectorContainer,
+        switchContainer,
         svgContainer,
     };
 };
@@ -128,27 +142,12 @@ const handleMouseLeave = (event: MouseEvent, params: Required<Params>) => {
 
 const handleResize = (params: Required<Params>) => {
     const { self } = params;
-    const { svg, polyLines, grid, rangeSelector, mousePointer } = self;
+    const { svg } = self;
 
-    // eslint-disable-next-line no-shadow
-    const aspectRatio = DomUtils.getAspectRatio(svg);
-    svg.setAttribute('viewBox', `0 0 ${100 * aspectRatio} 100`);
+    self.aspectRatio = DomUtils.getAspectRatio(svg);
 
-    polyLines.forEach(polyLine => {
-        polyLine.reRender({
-            aspectRatio,
-        });
-    });
-
-    mousePointer.reRender({
-        aspectRatio,
-    });
-
-    grid.reRender({
-        aspectRatio,
-    });
-
-    rangeSelector.reRender();
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    render(params);
 };
 
 const handleRangeSelectionChange = (
@@ -157,23 +156,68 @@ const handleRangeSelectionChange = (
     params: Required<Params>,
 ) => {
     const { self } = params;
-    const { grid, polyLines, mousePointer } = self;
+
+    self.xMinPercent = xMinPercent;
+    self.xMaxPercent = xMaxPercent;
+
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    render(params);
+};
+
+const handleCheckedIndexesChange = (
+    indexes: number[],
+    params: Required<Params>,
+) => {
+    const { self } = params;
+    self.checkedIndexes = indexes;
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    render(params);
+};
+
+const reRender = (params: Params) => {
+    const { self } = params;
+    const {
+        svg,
+        grid,
+        polyLines,
+        mousePointer,
+        aspectRatio,
+        rangeSelector,
+    } = self;
+
+    svg.setAttribute('viewBox', `0 0 ${100 * aspectRatio} 100`);
 
     const chartData = ChartDataUtils.transformDataToRender(params.data, {
-        xMinPercent,
-        xMaxPercent,
+        xMinPercent: self.xMinPercent,
+        xMaxPercent: self.xMaxPercent,
+        includingYIndexes: self.checkedIndexes,
     });
 
-    grid.reRender({ chartData });
-    polyLines.forEach((polyLine, index) =>
-        polyLine.reRender({
-            xPointsInPercents: chartData.xColumn.pointsPercentised,
-            yPointsInPercents: chartData.yColumns[index].pointsPercentised,
-        }),
-    );
-    mousePointer.reRender({ chartData });
-
     self.chartData = chartData;
+
+    grid.reRender({ chartData, aspectRatio });
+
+    polyLines.forEach((polyLine, index) => {
+        const yCol = chartData.yColumns[index];
+        if (yCol) {
+            polyLine.reRender({
+                xPointsInPercents: chartData.xColumn.pointsPercentised,
+                yPointsInPercents: yCol.pointsPercentised,
+                aspectRatio,
+                color: yCol.color,
+                isHidden: false,
+            });
+        } else {
+            polyLine.reRender({
+                isHidden: true,
+                color: 'black',
+            });
+        }
+    });
+
+    mousePointer.reRender({ chartData, aspectRatio });
+
+    rangeSelector.reRender();
 };
 
 type Instance = {
@@ -185,10 +229,16 @@ type Instance = {
     xScaleContainer: HTMLElement;
     rangeSelectorContainer: HTMLElement;
     rangeSelector: RangeSelectorInstance;
+    switchContainer: HTMLElement;
     svgContainer: HTMLElement;
     svg: SVGSVGElement;
     chartData: ChartRenderData;
     currentPointerX: number;
+    checkedIndexes: number[];
+    xMinPercent: number;
+    xMaxPercent: number;
+    aspectRatio: number;
+    colSwitch: ColSwitchInstance;
 };
 
 type Params = {
@@ -223,8 +273,23 @@ const render = (params: Params) => {
             mainContainer,
             headerContainer,
             rangeSelectorContainer,
+            switchContainer,
             svg,
         } = renderDom(container);
+
+        const chartDataUncut = ChartDataUtils.transformDataToRender(data);
+        const checkedIndexes = chartDataUncut.yColumns.map((y, index) => index);
+
+        const checkedIndexesChangeHandlerWrapper = {
+            onChage: (indexes: number[]) => {},
+        };
+        const colSwitch = ColSwitch.render({
+            mode: InitialData.mode,
+            container: switchContainer,
+            chartData: chartDataUncut,
+            onChange: indexes =>
+                checkedIndexesChangeHandlerWrapper.onChage(indexes),
+        });
 
         const aspectRatio = DomUtils.getAspectRatio(svg);
 
@@ -276,7 +341,6 @@ const render = (params: Params) => {
         const rangeSelectorChangeHandlerWrapper = {
             onChange: (x1: number, x2: number) => {},
         };
-        const chartDataUncut = ChartDataUtils.transformDataToRender(data);
         const rangeSelector = RangeSelector.render({
             chartData: chartDataUncut,
             container: rangeSelectorContainer,
@@ -293,14 +357,23 @@ const render = (params: Params) => {
             xScaleContainer,
             mainContainer,
             rangeSelectorContainer,
+            switchContainer,
             svg,
             polyLines,
             grid,
             mousePointer,
+            colSwitch,
+            rangeSelector,
             currentPointerX,
             chartData,
-            rangeSelector,
+            checkedIndexes,
+            xMinPercent: InitialData.rangeXMinPercent,
+            xMaxPercent: InitialData.rangeXMaxPercent,
+            aspectRatio,
         };
+
+        checkedIndexesChangeHandlerWrapper.onChage = (indexes: number[]) =>
+            handleCheckedIndexesChange(indexes, { ...params, self: instance });
 
         rangeSelectorChangeHandlerWrapper.onChange = (x1: number, x2: number) =>
             handleRangeSelectionChange(x1, x2, { ...params, self: instance });
@@ -327,7 +400,7 @@ const render = (params: Params) => {
             false,
         );
     } else {
-        // no need this for contest, may be somewhen later
+        reRender(params);
     }
 
     return instance;
