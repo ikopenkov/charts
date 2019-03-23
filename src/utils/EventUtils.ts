@@ -1,10 +1,10 @@
-const throttle = (handler: Function, timeout: number) => {
-    let resizeTimeout: number;
-    return () => {
-        if (!resizeTimeout) {
-            resizeTimeout = window.setTimeout(() => {
-                resizeTimeout = null;
-                handler();
+const throttle = <T extends Function>(handler: T, timeout: number) => {
+    let eventTimeout: number;
+    return (...args: any[]) => {
+        if (!eventTimeout) {
+            eventTimeout = window.setTimeout(() => {
+                eventTimeout = null;
+                handler(...args);
             }, timeout);
         }
     };

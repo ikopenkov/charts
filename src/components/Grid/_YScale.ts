@@ -14,6 +14,7 @@ type RenderParams = {
     aspectRatio: number;
     mode: ColorMode;
     isZeroScale: boolean;
+    isHidden: boolean;
     self?: Self;
 };
 
@@ -24,6 +25,7 @@ const render = ({
     yPercentised,
     mode,
     isZeroScale,
+    isHidden,
     self,
 }: RenderParams) => {
     let instance = self;
@@ -61,6 +63,10 @@ const render = ({
         'style',
         `stroke:${lineColor};stroke-width:${sizes.lineThin}`,
     );
+    DomUtils.setElementStyle(instance.line, {
+        transition: `${StyleUtils.TIMINGS_S.common}s`,
+        opacity: isHidden ? '0' : '1',
+    });
 
     const textPaddingPx = 5;
     const pxInPercent = svg.clientWidth / (100 * aspectRatio);
@@ -73,6 +79,8 @@ const render = ({
         fontSize: `${StyleUtils.SIZES_PX.scaleText}px`,
         color: colors.gridText,
         pointerEvents: 'none',
+        transition: `${StyleUtils.TIMINGS_S.common}s`,
+        opacity: isHidden ? '0' : '1',
     });
 
     instance.text.innerText = String(yOriginal);

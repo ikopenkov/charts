@@ -1,7 +1,7 @@
 import { ComponentUtils } from 'src/utils/ComponentUtils';
 import { DomUtils } from 'src/utils/DomUtils';
 import { ColorMode, StyleUtils } from 'src/utils/StyleUtils';
-import { EventUtils } from 'src/utils/EventUtils';
+import { EventUtils, GrabHandler } from 'src/utils/EventUtils';
 
 const borderWidthPx = 5;
 const rangerMinWidth = 10;
@@ -134,6 +134,7 @@ const updateBorderEl = ({
         bottom: '0',
         width: `${borderWidthPx}px`,
         cursor: 'ew-resize',
+        touchAction: 'none',
     });
 };
 
@@ -216,11 +217,14 @@ const render = (params: RenderParams) => {
         EventUtils.addGrabListener({
             element: rangerEl,
             onGrabStart: () => handleGrabStart('grab'),
-            onGrab: ({ xOffset }) =>
-                handleGrab(xOffset, paramsWithInstance, {
-                    x1Resize: true,
-                    x2Resize: true,
-                }),
+            onGrab: EventUtils.throttle<GrabHandler>(
+                ({ xOffset }) =>
+                    handleGrab(xOffset, paramsWithInstance, {
+                        x1Resize: true,
+                        x2Resize: true,
+                    }),
+                11,
+            ),
             onGrabEnd: () => handleGrabEnd(paramsWithInstance),
         });
 
@@ -228,11 +232,14 @@ const render = (params: RenderParams) => {
             EventUtils.addGrabListener({
                 element: borderEl,
                 onGrabStart: () => handleGrabStart('ew-resize'),
-                onGrab: ({ xOffset }) =>
-                    handleGrab(xOffset, paramsWithInstance, {
-                        x1Resize: index === 0,
-                        x2Resize: index === 1,
-                    }),
+                onGrab: EventUtils.throttle<GrabHandler>(
+                    ({ xOffset }) =>
+                        handleGrab(xOffset, paramsWithInstance, {
+                            x1Resize: index === 0,
+                            x2Resize: index === 1,
+                        }),
+                    11,
+                ),
                 onGrabEnd: () => handleGrabEnd(paramsWithInstance),
             });
         });

@@ -77,26 +77,37 @@ const renderYScales = (
         max: chartData.extremums.yMax,
     });
 
-    const extraSelfs = selfs.slice(yMarkers.length, Infinity);
-    extraSelfs.forEach(self => self.remove());
+    const rerenderedScales = yMarkers
+        .slice(0, yMarkers.length - 1)
+        .map((yOriginal, index) => {
+            let self = selfs[index];
+            const params = {
+                svg,
+                aspectRatio,
+                yOriginal,
+                yPercentised: yMarkersPercentised[index],
+                isZeroScale: index === 0,
+                mode,
+                isHidden: false,
+            };
+            if (!self) {
+                self = YScale.render(params);
+            } else {
+                self.reRender(params);
+            }
+            return self;
+        });
 
-    return yMarkers.slice(0, yMarkers.length - 1).map((yOriginal, index) => {
-        let self = selfs[index];
-        const params = {
-            svg,
-            aspectRatio,
-            yOriginal,
-            yPercentised: yMarkersPercentised[index],
-            isZeroScale: index === 0,
-            mode,
-        };
-        if (!self) {
-            self = YScale.render(params);
-        } else {
-            self.reRender(params);
+    selfs.forEach((scale, index) => {
+        if (!rerenderedScales[index]) {
+            rerenderedScales.push(selfs[index]);
+            selfs[index].reRender({
+                isHidden: true,
+            });
         }
-        return self;
     });
+
+    return rerenderedScales;
 };
 
 type Instance = {

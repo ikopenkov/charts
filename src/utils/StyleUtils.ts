@@ -39,7 +39,7 @@ const COLORS_BY_MODE = {
 };
 
 const TIMINGS_S = {
-    common: 0.5,
+    common: 0.3,
     fast: 0.1,
 };
 

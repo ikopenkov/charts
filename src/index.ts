@@ -37,6 +37,9 @@ import { StyleUtils } from 'src/utils/StyleUtils';
 //     switcherEl.appendChild(link);
 // });
 
+// @ts-ignore
+ChartDataMock = [ChartDataMock[4]];
+
 const allChartsContainer = document.getElementsByClassName(
     'chartWrapper',
 )[0] as HTMLDivElement;
