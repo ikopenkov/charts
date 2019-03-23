@@ -2,13 +2,10 @@ import { ComponentUtils } from 'src/utils/ComponentUtils';
 import { Circle, CircleInstance } from 'src/components/MousePointer/_Circle';
 import { ChartRenderData } from 'src/utils/ChartDataUtils/ChartData.types';
 import { Ruler, RulerInstance } from 'src/components/MousePointer/_Ruler';
-import {
-    Caption,
-    CaptionInstance,
-    CaptionStyle,
-} from 'src/components/MousePointer/_Caption';
+import { Caption, CaptionInstance } from 'src/components/MousePointer/_Caption';
 import { ChartDataUtils } from 'src/utils/ChartDataUtils/ChartDataUtils';
 import { MathUtils } from 'src/utils/MathUtils/MathUtils';
+import { ColorMode } from 'src/utils/StyleUtils';
 
 const getDateFormatted = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -29,16 +26,7 @@ type RenderParams = {
     container: HTMLElement;
     svg: SVGSVGElement;
     aspectRatio: number;
-    rulerStyle: {
-        widthInPercent: number;
-        color: string;
-    };
-    circleStyle: {
-        fillColor: string;
-        strokeWidthInPercent: number;
-        radiusInPercent: number;
-    };
-    captionStyle: CaptionStyle;
+    mode: ColorMode;
     isVisible: boolean;
     self?: Instance;
 };
@@ -48,9 +36,7 @@ const render = ({
     chartData,
     xPercent,
     aspectRatio,
-    circleStyle,
-    rulerStyle,
-    captionStyle,
+    mode,
     isVisible,
     self,
 }: RenderParams) => {
@@ -81,9 +67,8 @@ const render = ({
             x: xPoint,
             aspectRatio,
             svg,
-            color: '#DFE6EB',
             isVisible,
-            ...rulerStyle,
+            mode,
         });
 
         const circles = chartData.yColumns.map((yColumn, index) => {
@@ -95,7 +80,7 @@ const render = ({
                 color: yColumn.color,
                 svg,
                 isVisible,
-                ...circleStyle,
+                mode,
             });
         });
 
@@ -103,7 +88,7 @@ const render = ({
             x: xPoint,
             aspectRatio,
             container,
-            style: captionStyle,
+            mode,
             chartData,
             header: getDateFormatted(xOriginal),
             yValuesOriginal,
@@ -122,14 +107,14 @@ const render = ({
                 aspectRatio,
                 y: yValuesPercentised[index],
                 isVisible,
-                ...circleStyle,
+                mode,
             });
         });
         instance.ruler.reRender({
             aspectRatio,
             x: xPoint,
             isVisible,
-            ...rulerStyle,
+            mode,
         });
         instance.caption.reRender({
             aspectRatio,
@@ -137,7 +122,7 @@ const render = ({
             header: getDateFormatted(xOriginal),
             yValuesOriginal,
             chartData,
-            style: captionStyle,
+            mode,
             container,
             isVisible,
         });

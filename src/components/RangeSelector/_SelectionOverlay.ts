@@ -1,6 +1,6 @@
 import { ComponentUtils } from 'src/utils/ComponentUtils';
 import { DomUtils } from 'src/utils/DomUtils';
-import { StyleUtils } from 'src/utils/StyleUtils';
+import { ColorMode, StyleUtils } from 'src/utils/StyleUtils';
 import { EventUtils } from 'src/utils/EventUtils';
 
 const borderWidthPx = 5;
@@ -97,15 +97,18 @@ const handleGrabEnd = (renderParams: Required<RenderParams>) => {
 type MainPartParams = {
     leftPercent: number | string;
     rightPercent: number | string;
+    mode: ColorMode;
     self: HTMLElement;
 };
 const updateRangerEl = ({
     leftPercent,
     rightPercent,
+    mode,
     self,
 }: MainPartParams) => {
-    const borderLeftStyle = `5px solid ${StyleUtils.COLORS.rangerBorder}`;
-    const borderTopStyle = `1px solid ${StyleUtils.COLORS.rangerBorder}`;
+    const colors = StyleUtils.getColors({ mode });
+    const borderLeftStyle = `5px solid ${colors.rangerBorder}`;
+    const borderTopStyle = `1px solid ${colors.rangerBorder}`;
 
     DomUtils.setElementStyle(self, {
         position: 'absolute',
@@ -143,14 +146,16 @@ const updateOverlayEl = ({
     leftPercent,
     rightPercent,
     self,
+    mode,
 }: MainPartParams) => {
+    const colors = StyleUtils.getColors({ mode });
     DomUtils.setElementStyle(self, {
         position: 'absolute',
         left: `${leftPercent}%`,
         right: `${rightPercent}%`,
         top: '0',
         bottom: '0',
-        backgroundColor: StyleUtils.COLORS.rangerOverlay,
+        backgroundColor: colors.rangerOverlay,
     });
 };
 
@@ -172,6 +177,7 @@ type RenderParams = {
     onChange: ChangeHandler;
     initialX1: number;
     initialX2: number;
+    mode: ColorMode;
 };
 
 const render = (params: RenderParams) => {
@@ -237,6 +243,8 @@ const render = (params: RenderParams) => {
         });
     }
 
+    const { mode } = params;
+
     const leftPercent = instance.x1;
     const rightPercent = 100 - instance.x2;
 
@@ -244,6 +252,7 @@ const render = (params: RenderParams) => {
         self: instance.rangerEl,
         leftPercent,
         rightPercent,
+        mode,
     });
 
     instance.borders.forEach((borderEl, index) => {
@@ -251,6 +260,7 @@ const render = (params: RenderParams) => {
             self: borderEl,
             leftPercent: index === 0 ? leftPercent : 'auto',
             rightPercent: index === 1 ? rightPercent : 'auto',
+            mode,
         });
     });
 
@@ -258,12 +268,14 @@ const render = (params: RenderParams) => {
         self: instance.overlays[0],
         leftPercent: 0,
         rightPercent: 100 - instance.x1,
+        mode,
     });
 
     updateOverlayEl({
         self: instance.overlays[1],
         leftPercent: instance.x2,
         rightPercent: 0,
+        mode,
     });
 
     return instance;

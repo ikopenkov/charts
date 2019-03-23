@@ -16,10 +16,17 @@ import {
     RangeSelector,
     RangeSelectorInstance,
 } from 'src/components/RangeSelector/RangeSelector';
+import { ColorMode } from 'src/utils/StyleUtils';
 
-const InitialData = {
+type InitialDataType = {
+    rangeXMinPercent: number;
+    rangeXMaxPercent: number;
+    mode: ColorMode;
+};
+const InitialData: InitialDataType = {
     rangeXMinPercent: 70,
     rangeXMaxPercent: 100,
+    mode: 'day',
 };
 
 const renderDom = (container: HTMLElement) => {
@@ -85,7 +92,7 @@ const renderDom = (container: HTMLElement) => {
     };
 };
 
-const handleMouseMove = (event: PointerEvent, params: Required<Params>) => {
+const handleMouseMove = (event: MouseEvent, params: Required<Params>) => {
     const { self } = params;
     const { svg, currentPointerX, mousePointer } = self;
     const {
@@ -113,7 +120,7 @@ const handleMouseMove = (event: PointerEvent, params: Required<Params>) => {
     }
 };
 
-const handleMouseLeave = (event: PointerEvent, params: Required<Params>) => {
+const handleMouseLeave = (event: MouseEvent, params: Required<Params>) => {
     const { self } = params;
     const { mousePointer } = self;
     mousePointer.reRender({ isVisible: false });
@@ -262,19 +269,7 @@ const render = (params: Params) => {
             xPercent: currentPointerX,
             aspectRatio,
             chartData,
-            circleStyle: {
-                radiusInPercent: sizesInPercent.pointerCircleRadius,
-                strokeWidthInPercent: sizesInPercent.lineBold,
-                fillColor: colors.background,
-            },
-            rulerStyle: {
-                widthInPercent: sizesInPercent.lineThin,
-                color: colors.ruler,
-            },
-            captionStyle: {
-                backgroundColor: colors.background,
-                headerColor: colors.text,
-            },
+            mode: InitialData.mode,
             isVisible: false,
         });
 
@@ -289,6 +284,7 @@ const render = (params: Params) => {
                 rangeSelectorChangeHandlerWrapper.onChange(x1, x2),
             initialX1: InitialData.rangeXMinPercent,
             initialX2: InitialData.rangeXMaxPercent,
+            mode: InitialData.mode,
         });
 
         instance = {
@@ -309,13 +305,13 @@ const render = (params: Params) => {
         rangeSelectorChangeHandlerWrapper.onChange = (x1: number, x2: number) =>
             handleRangeSelectionChange(x1, x2, { ...params, self: instance });
 
-        svg.addEventListener('pointermove', event =>
+        svg.addEventListener('mousemove', event =>
             handleMouseMove(event, {
                 ...params,
                 self: instance,
             }),
         );
-        svg.addEventListener('pointerleave', event =>
+        svg.addEventListener('mouseleave', event =>
             handleMouseLeave(event, {
                 ...params,
                 self: instance,

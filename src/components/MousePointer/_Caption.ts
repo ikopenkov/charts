@@ -1,6 +1,7 @@
 import { ComponentUtils } from 'src/utils/ComponentUtils';
 import { DomUtils } from 'src/utils/DomUtils';
 import { ChartRenderData } from 'src/utils/ChartDataUtils/ChartData.types';
+import { ColorMode, StyleUtils } from 'src/utils/StyleUtils';
 
 const renderDescriptionHtml = (value: number, name: string) =>
     `<div style="font-weight: bold;">${value}</div><div style="margin-top: 2px; font-size: 10px">${name}</div>`;
@@ -12,27 +13,22 @@ type Self = {
     descriptionEls: HTMLElement[];
 };
 
-export type CaptionStyle = {
-    backgroundColor: string;
-    headerColor: string;
-};
-
 type RenderParams = {
     x: number;
     container: HTMLElement;
     aspectRatio: number;
-    style: CaptionStyle;
     chartData: ChartRenderData;
     header: string;
     yValuesOriginal: number[];
     isVisible: boolean;
+    mode: ColorMode;
     self?: Self;
 };
 
 const render = ({
     container,
     chartData,
-    style,
+    mode,
     x,
     aspectRatio,
     header,
@@ -97,12 +93,13 @@ const render = ({
         const rightSideX = leftSideX + width;
         const needStickToRight = rightSideX > containerWidth;
 
+        const colors = StyleUtils.getColors({ mode });
         DomUtils.setElementStyle(instance.rootEl, {
             padding: '5px 10px',
             position: 'absolute',
             right: needStickToRight ? '0' : 'auto',
             left: needStickToRight ? 'auto' : `${leftSideX - missingLeft}px`,
-            backgroundColor: style.backgroundColor,
+            backgroundColor: colors.background,
             boxShadow: '0px 0px 3px 1px rgba(0, 0, 0, 0.1)',
             borderRadius: '5px',
             top: '0',

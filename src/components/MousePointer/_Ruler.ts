@@ -1,20 +1,19 @@
 import { ComponentUtils } from 'src/utils/ComponentUtils';
 import { DomUtils } from 'src/utils/DomUtils';
+import { ColorMode, StyleUtils } from 'src/utils/StyleUtils';
 
 type RenderParams = {
     x: number;
-    color: string;
     svg: SVGSVGElement;
     aspectRatio: number;
-    widthInPercent: number;
     isVisible: boolean;
+    mode: ColorMode;
     self?: SVGLineElement;
 };
 const render = ({
     svg,
-    widthInPercent,
-    color,
     x,
+    mode,
     aspectRatio,
     isVisible,
     self,
@@ -27,13 +26,16 @@ const render = ({
     if (isVisible) {
         const xProportionated = x * aspectRatio;
 
+        const sizes = StyleUtils.getSizesInPercents(svg.clientWidth);
+        const colors = StyleUtils.getColors({ mode });
+
         line.setAttribute('x1', String(xProportionated));
         line.setAttribute('x2', String(xProportionated));
         line.setAttribute('y1', '0');
         line.setAttribute('y2', '100');
         line.setAttribute(
             'style',
-            `stroke:${color};stroke-width:${widthInPercent}`,
+            `stroke:${colors.ruler};stroke-width:${sizes.lineThin}`,
         );
 
         DomUtils.setElementStyle(line, { display: '' });

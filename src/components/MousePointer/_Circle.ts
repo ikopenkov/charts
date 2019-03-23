@@ -1,28 +1,25 @@
 import { ComponentUtils } from 'src/utils/ComponentUtils';
 import { DomUtils } from 'src/utils/DomUtils';
+import { ColorMode, StyleUtils } from 'src/utils/StyleUtils';
 
 type RenderParams = {
     x: number;
     y: number;
     color: string;
-    strokeWidthInPercent: number;
-    radiusInPercent: number;
-    fillColor: string;
     svg: SVGSVGElement;
     aspectRatio: number;
     isVisible: boolean;
+    mode: ColorMode;
     self?: SVGCircleElement;
 };
 const render = ({
     svg,
     color,
-    fillColor,
-    radiusInPercent,
-    strokeWidthInPercent,
     x,
     y,
     aspectRatio,
     isVisible,
+    mode,
     self,
 }: RenderParams) => {
     let circle = self;
@@ -37,12 +34,18 @@ const render = ({
     if (isVisible) {
         const xProportionated = x * aspectRatio;
 
+        const sizes = StyleUtils.getSizesInPercents(
+            svg.clientWidth,
+            aspectRatio,
+        );
+        const colors = StyleUtils.getColors({ mode });
+
         circle.setAttribute('cx', String(xProportionated));
         circle.setAttribute('cy', String(y));
-        circle.setAttribute('r', String(radiusInPercent));
+        circle.setAttribute('r', String(sizes.pointerCircleRadius));
         circle.setAttribute('stroke', color);
-        circle.setAttribute('stroke-width', String(strokeWidthInPercent));
-        circle.setAttribute('fill', fillColor);
+        circle.setAttribute('stroke-width', String(sizes.lineBold));
+        circle.setAttribute('fill', colors.background);
         DomUtils.setElementStyle(circle, { display: '' });
     } else {
         DomUtils.setElementStyle(circle, { display: 'none' });

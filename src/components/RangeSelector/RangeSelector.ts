@@ -7,6 +7,7 @@ import {
     SelectionOverlay,
     SelectionOverlayInstance,
 } from 'src/components/RangeSelector/_SelectionOverlay';
+import { ColorMode } from 'src/utils/StyleUtils';
 
 type Self = {
     svg: SVGSVGElement;
@@ -20,6 +21,7 @@ type RenderParams = {
     onChange: ChangeHandler;
     initialX1: number;
     initialX2: number;
+    mode: ColorMode;
     self?: Self;
 };
 
@@ -29,6 +31,7 @@ const render = ({
     initialX2,
     onChange,
     chartData,
+    mode,
     self,
 }: RenderParams) => {
     const aspectRatio = DomUtils.getAspectRatio(container);
@@ -58,6 +61,7 @@ const render = ({
             onChange,
             initialX1,
             initialX2,
+            mode,
         });
 
         instance = {
@@ -80,6 +84,7 @@ const render = ({
 
         instance.selectionOverlay.reRender({
             container,
+            mode,
         });
     }
 

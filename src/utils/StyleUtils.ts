@@ -18,6 +18,17 @@ const COLORS = {
     rangerBorder: 'rgba(201, 220, 232, 0.5)',
 };
 
+const COLORS_BY_MODE = {
+    day: COLORS,
+    night: COLORS,
+};
+
+export type ColorMode = 'day' | 'night';
+
+const getColors = ({ mode }: { mode: ColorMode }) => {
+    return COLORS_BY_MODE[mode];
+};
+
 const getSizesInPercents = (width: number, aspectRatio: number = 1) => {
     const pxInPercent = width / (100 * aspectRatio);
 
@@ -25,7 +36,7 @@ const getSizesInPercents = (width: number, aspectRatio: number = 1) => {
 };
 
 export const StyleUtils = {
-    COLORS,
     SIZES_PX,
     getSizesInPercents,
+    getColors,
 };
